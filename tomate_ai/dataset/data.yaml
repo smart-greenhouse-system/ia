@@ -1,0 +1,16 @@
+names:
+- Anthesis
+- Flower Bud
+- Fruit Bud
+- Fruit Maturation
+- Fully Grown
+nc: 5
+roboflow:
+  license: CC BY 4.0
+  project: cherry-tomato-growth-stages-msmd7
+  url: https://universe.roboflow.com/growth-stages/cherry-tomato-growth-stages-msmd7/dataset/1
+  version: 1
+  workspace: growth-stages
+test: ../test/images
+train: ../train/images
+val: ../valid/images
