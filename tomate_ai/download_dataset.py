@@ -15,7 +15,7 @@
 
 from roboflow import Roboflow
 
-rf = Roboflow(api_key="TQJwc8CVCEjpmYXuBbAt")
+rf = Roboflow(api_key="ROBOTFLOW_API")
 
 project = rf.workspace("plantdetection-fcner").project(
     "cherry-tomato-plants"
