@@ -12,7 +12,6 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-
     data = request.get_json(silent=True)
 
     if not data or "image" not in data:
@@ -35,3 +34,5 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+# source /home/pablo/Documents/Python/venv/bin/activate
