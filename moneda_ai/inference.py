@@ -1,14 +1,20 @@
 import base64
 import os
+import sys
 import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
 
 from model import MonedaDetector
+
+BASE_DIR = Path(__file__).parent
 
 
 class MonedaInference:
 
     def __init__(self):
-        self.detector = MonedaDetector(weights="models/best.pt")
+        self.detector = MonedaDetector(weights=str(BASE_DIR / "models" / "best.pt"))
 
     def _decode_image(self, image_base64):
         if "," in image_base64:
