@@ -82,7 +82,7 @@ pip install -r REQUIREMENTS.txt
 
 ### 3️⃣ Ejecutar Aplicación
 ```bash
-python unified_app.py
+python app.py
 ```
 
 ### 4️⃣ Probar Endpoints
