@@ -4,18 +4,33 @@ Aplicación Flask que integra tres modelos de IA independientes (Lechuga, Moneda
 
 ---
 
+## 🤝 Agregar Nuevo Modelo
+
+1. Crear carpeta `nuevo_modelo_ai/`
+2. Copiar estructura (inference.py, model.py, etc.)
+3. Crear `routes/nuevo_modelo_routes.py`
+4. Registrar blueprint en `app.py`:
+   ```python
+   from routes.nuevo_modelo_routes import nuevo_modelo_bp
+   app.register_blueprint(nuevo_modelo_bp, url_prefix='/nuevo_modelo')
+   ```
+
+---
+
+## 📝 Versión
+
+- **API Version:** 1.0
+- **Flask:** 3.0.0
+- **Ultralytics:** 8.0.0+
+- **Python:** 3.8+
+
+
 ## 🏗️ Arquitectura
 
-### Antes (3 microservicios separados)
-```
-lechuga_ai/        moneda_ai/        tomate_ai/
-  app.py              app.py             app.py
-  :5001               :5002              :5003
-```
 
-### Después (1 aplicación unificada)
+### 1 aplicación unificada
 ```
-unified_app.py
+app.py
   ├── /lechuga/predict   (LechugaInference)
   ├── /moneda/predict    (MonedaInference)
   └── /tomate/predict    (TomatoInference)
@@ -29,10 +44,7 @@ unified_app.py
 
 ```
 .
-├── unified_app.py              # 🔴 ARCHIVO PRINCIPAL
-├── config.py                   # Configuración centralizada
-├── diagnose.py                 # Script de diagnóstico
-├── EJEMPLOS_USO.py            # Ejemplos en Python/JS
+├── app.py              # 🔴 ARCHIVO PRINCIPAL
 ├── MANUAL_INSTALACION.md      # Guía paso a paso
 ├── REQUIREMENTS.txt           # Dependencias
 │
@@ -42,11 +54,11 @@ unified_app.py
 │   ├── moneda_routes.py       # Endpoints de moneda
 │   └── tomate_routes.py       # Endpoints de tomate
 │
-├── lechuga_ai/                # Código original (intacto)
-├── moneda_ai/                 # Código original (intacto)
-├── tomate_ai/                 # Código original (intacto)
+├── lechuga_ai/                
+├── moneda_ai/                 
+├── tomate_ai/                 
 │
-└── templates/                 # HTML compartido
+└── templates/                
     ├── index.html
     └── 404.html
 ```
@@ -91,11 +103,8 @@ curl -X POST http://localhost:5000/lechuga/predict \
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `GET` | `/` | Información general de la API |
-| `GET` | `/lechuga/` | Página inicio lechuga |
 | `POST` | `/lechuga/predict` | Predicción de etapa lechuga |
-| `GET` | `/moneda/` | Página inicio moneda |
 | `POST` | `/moneda/predict` | Predicción de monedas |
-| `GET` | `/tomate/` | Página inicio tomate |
 | `POST` | `/tomate/predict` | Predicción etapa tomate |
 
 ---
@@ -111,12 +120,7 @@ curl -X POST http://localhost:5000/lechuga/predict \
 
 ### Response (exitosa)
 ```json
-{
-  "success": true,
-  "etapa": "Harvest Stage",
-  "apto_cosecha": true,
-  "confianza": 0.95
-}
+Toca cuadrar bien
 ```
 
 ### Response (error)
@@ -146,133 +150,32 @@ Cada carpeta de modelo contiene:
 
 ### 3. Rutas Dinámicas
 ```python
-# En unified_app.py
+# En app.py
 app.register_blueprint(lechuga_bp, url_prefix='/lechuga')
 # Convierte:
 #   /lechuga/predict  → lechuga_routes.py:predict_lechuga()
 ```
 
----
-
-## ✅ Sin Modificaciones a Lógica Original
-
-**Importante:** La lógica de cada modelo se mantiene intacta:
-- Los archivos `inference.py` no fueron modificados
-- Los archivos `model.py` no fueron modificados
-- Solo se creó un "wrapper" (envoltorio) en los blueprints
-
-```python
-# Antes (lechuga_ai/app.py):
-model = LechugaInference()
-result = model.predict_base64(image_base64)
-
-# Después (routes/lechuga_routes.py):
-modelo_lechuga = LechugaInference()  # 🟢 MISMO CÓDIGO
-result = modelo_lechuga.predict_base64(image_base64)  # 🟢 MISMA FUNCIÓN
-```
-
----
-
-## 🛠️ Comando Paso a Paso (Resumen)
-
-### Windows PowerShell
-```powershell
-# 1. Crear entorno
-python -m venv venv
-
-# 2. Activar entorno
-.\venv\Scripts\Activate.ps1
-
-# 3. Instalar paquetes
-pip install -r REQUIREMENTS.txt
-
-# 4. Ejecutar
-python unified_app.py
-
-# 5. Verificar en navegador
-Start-Process http://localhost:5000
-```
-
-### Linux / Mac
-```bash
-# 1. Crear entorno
-python3 -m venv venv
-
-# 2. Activar entorno
-source venv/bin/activate
-
-# 3. Instalar paquetes
-pip install -r REQUIREMENTS.txt
-
-# 4. Ejecutar
-python unified_app.py
-
-# 5. Verificar
-open http://localhost:5000
-```
-
----
-
-## 🧪 Diagnóstico Automático
-
-```bash
-python diagnose.py
-```
-
-Verifica:
-- ✓ Versión de Python
-- ✓ Paquetes instalados
-- ✓ Estructura de carpetas
-- ✓ Archivos de modelos
-- ✓ Importaciones funcionales
-
----
-
 ## 📚 Documentación Adicional
 
 - **[MANUAL_INSTALACION.md](MANUAL_INSTALACION.md)** - Guía completa paso a paso
-- **[EJEMPLOS_USO.py](EJEMPLOS_USO.py)** - Ejemplos en Python, JavaScript y curl
-- **[config.py](config.py)** - Configuración centralizada
 
 ---
 
 ## 🔐 Configuración para Producción
 
-1. Cambiar `DEBUG = False` en `unified_app.py`
+1. Cambiar `DEBUG = False` en `app.py`
 2. Generar `SECRET_KEY` fuerte
 3. Usar gunicorn en lugar de Flask:
    ```bash
    pip install gunicorn
-   gunicorn -w 4 -b 0.0.0.0:5000 unified_app:app
+   gunicorn -w 4 -b 0.0.0.0:5000 app:app
    ```
 4. Usar reverse proxy (nginx)
 5. HTTPS/SSL
 
 ---
 
-## 🤝 Agregar Nuevo Modelo
-
-1. Crear carpeta `nuevo_modelo_ai/`
-2. Copiar estructura (inference.py, model.py, etc.)
-3. Crear `routes/nuevo_modelo_routes.py`
-4. Registrar blueprint en `unified_app.py`:
-   ```python
-   from routes.nuevo_modelo_routes import nuevo_modelo_bp
-   app.register_blueprint(nuevo_modelo_bp, url_prefix='/nuevo_modelo')
-   ```
-
----
-
-## 📞 Soporte
-
-| Problema | Solución |
-|----------|----------|
-| Port 5000 ya en uso | Cambiar puerto en `unified_app.py` |
-| Módulo no encontrado | `pip install -r REQUIREMENTS.txt` |
-| Modelos no cargan | Verificar rutas en `config.py` |
-| ImportError | Ejecutar `python diagnose.py` |
-
----
 
 ## 📊 Notas de Rendimiento
 
@@ -282,13 +185,4 @@ Verifica:
 
 ---
 
-## 📝 Versión
 
-- **API Version:** 1.0
-- **Flask:** 3.0.0
-- **Ultralytics:** 8.0.0+
-- **Python:** 3.8+
-
----
-
-**¡API lista para usar! 🚀**
