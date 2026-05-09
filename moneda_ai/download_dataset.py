@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -5,13 +6,23 @@ from roboflow import Roboflow
 
 load_dotenv(Path(__file__).parent / ".env")
 
-rf = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"])
+from roboflow import Roboflow
 
-project = rf.workspace("bin-mibxd").project("coin-segmentation-8ah7d")
+rf = Roboflow(api_key="TQJwc8CVCEjpmYXuBbAt")
 
-version = project.version(4)
+
+project = rf.workspace("bin-mibxd").project(
+    "coin-segmentation-8ah7d"
+)
+
+version = project.version(1)
+
+dataset = version.download("yolov8")
+
 
 dataset_path = str(Path(__file__).parent / "dataset")
 dataset = version.download("yolov8", location=dataset_path)
 
+
 print("Dataset descargado en:", dataset.location)
+
