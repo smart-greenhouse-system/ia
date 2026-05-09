@@ -1,0 +1,16 @@
+names:
+- ripe0
+- ripe1
+- ripe2
+- rot_lvl1
+- rot_lvl2
+nc: 5
+roboflow:
+  license: CC BY 4.0
+  project: cherry-tomato-tpgsw
+  url: https://universe.roboflow.com/personal-6qa5a/cherry-tomato-tpgsw/dataset/4
+  version: 4
+  workspace: personal-6qa5a
+test: ../test/images
+train: ../train/images
+val: ../valid/images
