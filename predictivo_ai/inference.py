@@ -34,32 +34,48 @@ class PredictivoInference:
 
         self.alerta_classes = self.le_alerta.classes_
 
-    def _aplicar_reglas(self, temperature, humidity, soil_moisture, sunlight, umbral):
+    def _evaluar_cada_variable(self, temperature, humidity, soil_moisture, sunlight, umbral):
         t_min, t_max = umbral['temp']
         hr_min, hr_max = umbral['hr']
         s_min, s_max = umbral['suelo']
         l_min, l_max = umbral['luz']
 
-        if temperature > t_max + 1:
-            return 'ACTIVAR_VENTILACION', 'temperatura'
-        if temperature < t_min - 1:
-            return 'ACTIVAR_CALEFACCION', 'temperatura'
-        if soil_moisture < s_min - 3:
-            return 'ACTIVAR_RIEGO', 'humedad_suelo'
-        if humidity < hr_min - 3:
-            return 'ACTIVAR_NEBULIZACION', 'humedad'
-        if humidity > hr_max + 3:
-            return 'ACTIVAR_DESHUMIDIFICADOR', 'humedad'
-        if sunlight < l_min - 30:
-            return 'ACTIVAR_LED_SUPLEMENTAL', 'iluminacion'
-        if sunlight > l_max + 50:
-            return 'REDUCIR_LUZ', 'iluminacion'
-        if temperature > t_max and soil_moisture < s_min:
-            return 'ACTIVAR_RIEGO_Y_VENTILACION', 'multiple'
-        if temperature < t_min and humidity < hr_min:
-            return 'ACTIVAR_CALEFACCION_Y_NEBULIZACION', 'multiple'
+        chequeos = []
 
-        return 'SIN_ALERTA', None
+        def _agregar(condicion, accion, var, valor, opt_min, opt_max):
+            if condicion:
+                nivel = self._calcular_nivel_urgencia(valor, opt_min, opt_max)
+                chequeos.append({
+                    'variable': var,
+                    'valor_actual': round(valor, 1),
+                    'valor_optimo_min': opt_min,
+                    'valor_optimo_max': opt_max,
+                    'accion': accion,
+                    'nivel_urgencia': nivel
+                })
+
+        _agregar(temperature > t_max + 1, 'ACTIVAR_VENTILACION', 'temperatura', temperature, t_min, t_max)
+        _agregar(temperature < t_min - 1, 'ACTIVAR_CALEFACCION', 'temperatura', temperature, t_min, t_max)
+        _agregar(soil_moisture < s_min - 3, 'ACTIVAR_RIEGO', 'humedad_suelo', soil_moisture, s_min, s_max)
+        _agregar(humidity < hr_min - 3, 'ACTIVAR_NEBULIZACION', 'humedad', humidity, hr_min, hr_max)
+        _agregar(humidity > hr_max + 3, 'ACTIVAR_DESHUMIDIFICADOR', 'humedad', humidity, hr_min, hr_max)
+        _agregar(sunlight < l_min - 30, 'ACTIVAR_LED_SUPLEMENTAL', 'iluminacion', sunlight, l_min, l_max)
+        _agregar(sunlight > l_max + 50, 'REDUCIR_LUZ', 'iluminacion', sunlight, l_min, l_max)
+
+        return chequeos
+
+    def _aplicar_reglas(self, temperature, humidity, soil_moisture, sunlight, umbral):
+        chequeos = self._evaluar_cada_variable(temperature, humidity, soil_moisture, sunlight, umbral)
+
+        if not chequeos:
+            return 'SIN_ALERTA', None, chequeos
+
+        chequeos_priorizados = sorted(
+            chequeos,
+            key=lambda x: {'CRITICO': 0, 'ALTO': 1, 'MEDIO': 2}.get(x['nivel_urgencia'], 3)
+        )
+        principal = chequeos_priorizados[0]
+        return principal['accion'], principal['variable'], chequeos
 
     def _obtener_info_variable(self, variable, temperature, humidity, soil_moisture, sunlight, umbral):
         if variable is None or variable == 'multiple':
@@ -106,14 +122,14 @@ class PredictivoInference:
         return (f"{nombre_cultivo} en {etapa}: {parte_variable}"
                 f"Accion: {CONSTANTES_ALERTA.get(accion, accion)}.")
 
-    def predict(self, cultivo, etapa, temperature, humidity, soil_moisture, sunlight):
+    def predict(self, cultivo, etapa, temperature, humidity, soil_moisture, sunlight, todas_variables=False):
         validar_cultivo(cultivo)
         validar_etapa(cultivo, etapa)
         validar_rangos(temperature, humidity, soil_moisture, sunlight)
 
         umbral = UMBRALES[cultivo][etapa]
 
-        accion_regla, variable = self._aplicar_reglas(
+        accion_regla, variable, chequeos = self._aplicar_reglas(
             temperature, humidity, soil_moisture, sunlight, umbral
         )
 
@@ -125,12 +141,15 @@ class PredictivoInference:
             accion_ml = self.alerta_classes[alerta_cod]
 
             if accion_ml == 'SIN_ALERTA':
-                return {
+                result = {
                     "success": True,
                     "status": "OK",
                     "cultivo": cultivo,
                     "etapa": etapa
                 }
+                if todas_variables:
+                    result["todas_las_variables"] = []
+                return result
 
             valor_actual, opt_min, opt_max = self._obtener_info_variable(
                 variable, temperature, humidity, soil_moisture, sunlight, umbral
@@ -152,6 +171,8 @@ class PredictivoInference:
                 result["valor_actual"] = valor_actual
                 result["valor_optimo_min"] = opt_min
                 result["valor_optimo_max"] = opt_max
+            if todas_variables:
+                result["todas_las_variables"] = chequeos if chequeos else []
             return result
 
         valor_actual, opt_min, opt_max = self._obtener_info_variable(
@@ -174,5 +195,7 @@ class PredictivoInference:
             result["valor_actual"] = valor_actual
             result["valor_optimo_min"] = opt_min
             result["valor_optimo_max"] = opt_max
+        if todas_variables:
+            result["todas_las_variables"] = chequeos
 
         return result
