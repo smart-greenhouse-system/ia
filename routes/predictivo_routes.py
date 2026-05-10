@@ -42,7 +42,8 @@ def predict_predictivo():
             temperature=float(data['temperature']),
             humidity=float(data['humidity']),
             soil_moisture=float(data['soil_moisture']),
-            sunlight=float(data['sunlight'])
+            sunlight=float(data['sunlight']),
+            todas_variables=data.get('todas_las_variables', False)
         )
         return jsonify(result)
     except ValueError as e:
