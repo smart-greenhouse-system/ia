@@ -1,15 +1,21 @@
 import sys
 from pathlib import Path
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "predictivo_ai"))
 from inference import PredictivoInference
 
-predictivo_bp = Blueprint("predictivo", __name__)
+predictivo_bp = Blueprint("predictivo", __name__,
+                          template_folder=str(Path(__file__).parent.parent / "predictivo_ai" / "templates"))
 modelo_predictivo = PredictivoInference()
 
 CAMPOS_REQUERIDOS = ['cultivo', 'etapa', 'temperature', 'humidity', 'soil_moisture', 'sunlight']
+
+
+@predictivo_bp.route("/", methods=["GET"])
+def index_predictivo():
+    return render_template('predictivo.html')
 
 
 @predictivo_bp.route("/predict", methods=["POST"])
