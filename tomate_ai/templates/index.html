@@ -291,6 +291,29 @@
             margin-top:8px;
         }
 
+        .json-viewer{
+
+            background:#1e1e1e;
+
+            color:#d4d4d4;
+
+            border-radius:12px;
+
+            padding:20px;
+
+            font-family: monospace;
+
+            font-size:14px;
+
+            white-space: pre;
+
+            overflow-x: auto;
+
+            max-height:300px;
+
+            overflow-y: auto;
+        }
+
         @media(max-width:900px){
 
             .main-grid{
@@ -441,6 +464,19 @@
 
     </div>
 
+    <!-- JSON -->
+    <div class="card"
+         style="margin-top:30px;">
+
+        <h2>📋 Respuesta JSON</h2>
+
+        <div class="json-viewer"
+             id="jsonViewer">
+            Aqui aparecera la respuesta del modelo...
+        </div>
+
+    </div>
+
     <!-- TOMATES -->
     <div class="card tomatoes">
 
@@ -505,6 +541,11 @@
         document.getElementById(
             "totalTomates"
         ).innerText = "0";
+
+        document.getElementById(
+            "jsonViewer"
+        ).innerText =
+            "Aqui aparecera la respuesta del modelo...";
     }
 
     // ==========================================
@@ -618,6 +659,14 @@
                 ).innerText =
                     etapa.dias_cosecha;
             }
+
+            // json
+            const display = {...data};
+            delete display.annotated_image;
+            document.getElementById(
+                "jsonViewer"
+            ).innerText =
+                JSON.stringify(display, null, 2);
 
             // tomates
             const container =

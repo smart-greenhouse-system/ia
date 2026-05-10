@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+
 from flask import Flask, request, jsonify, render_template
 from inference import TomatoInference
 
@@ -5,8 +10,7 @@ app = Flask(__name__)
 model = TomatoInference()
 
 
-
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
 
@@ -34,5 +38,3 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-# source /home/pablo/Documents/Python/venv/bin/activate

@@ -7,7 +7,7 @@ load_dotenv(Path(__file__).parent / ".env")
 
 rf = Roboflow(api_key=os.environ["ROBOFLOW_API_KEY"])
 
-project = rf.workspace("robotics-v9fnj").project("lettuce-growth-stage-qld0b")
+project = rf.workspace("omars-workspace-mjqor").project("lettuce_segm")
 
 version = project.version(1)
 

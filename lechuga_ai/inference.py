@@ -1,4 +1,5 @@
 import base64
+import cv2
 import os
 import sys
 import tempfile
@@ -16,21 +17,6 @@ class LechugaInference:
     def __init__(self):
         self.detector = LechugaDetector(weights=str(BASE_DIR / "models" / "best.pt"))
 
-        self.stage_info = {
-            "Harvest Stage": {
-                "apto_cosecha": True,
-                "recomendacion": "Lechuga lista para cosechar."
-            },
-            "Vegetative Stage": {
-                "apto_cosecha": False,
-                "recomendacion": "Planta en desarrollo foliar. Aún no ha alcanzado el tamaño óptimo."
-            },
-            "Seedling Stage": {
-                "apto_cosecha": False,
-                "recomendacion": "Planta en etapa de plántula. Requiere más tiempo de desarrollo."
-            }
-        }
-
     def _decode_image(self, image_base64):
         if "," in image_base64:
             image_base64 = image_base64.split(",")[1]
@@ -42,6 +28,10 @@ class LechugaInference:
         temp.close()
 
         return temp.name
+
+    def _encode_image(self, img_array):
+        _, buffer = cv2.imencode(".jpg", img_array)
+        return base64.b64encode(buffer).decode("utf-8")
 
     def predict_base64(self, image_base64):
         image_path = self._decode_image(image_base64)
@@ -60,17 +50,17 @@ class LechugaInference:
             confidence = float(box.conf[0])
             class_name = results.names[class_id]
 
-            info = self.stage_info.get(class_name, {
-                "apto_cosecha": False,
-                "recomendacion": "Etapa desconocida"
-            })
+            tiene_mascara = results.masks is not None and len(results.masks) > 0
+
+            annotated = results.plot()
+            annotated_b64 = self._encode_image(annotated)
 
             return {
                 "success": True,
                 "etapa": class_name,
-                "apto_cosecha": info["apto_cosecha"],
-                "recomendacion": info["recomendacion"],
-                "confianza": round(confidence, 3)
+                "confianza": round(confidence, 3),
+                "tiene_mascara": tiene_mascara,
+                "annotated_image": annotated_b64
             }
         finally:
             os.remove(image_path)

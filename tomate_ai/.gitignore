@@ -1,0 +1,7 @@
+.env
+dataset/
+cherry-tomato-4/
+Cherry-Tomato-Plants-1/
+runs/
+__pycache__/
+*.pt
