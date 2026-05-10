@@ -17,6 +17,7 @@ from flask import Flask, render_template, jsonify
 from routes.lechuga_routes import lechuga_bp
 from routes.moneda_routes import moneda_bp
 from routes.tomate_routes import tomate_bp
+from routes.predictivo_routes import predictivo_bp
 
 
 def create_app():
@@ -31,6 +32,7 @@ def create_app():
     app.register_blueprint(lechuga_bp, url_prefix='/lechuga')
     app.register_blueprint(moneda_bp, url_prefix='/moneda')
     app.register_blueprint(tomate_bp, url_prefix='/tomate')
+    app.register_blueprint(predictivo_bp, url_prefix='/predictivo')
     
     # Ruta raíz: información general de la API
     @app.route("/", methods=["GET"])
@@ -54,6 +56,11 @@ def create_app():
                     "nombre": "Tomate",
                     "endpoint": "/tomate/predict",
                     "descripcion": "Detecta tomate cherry y su etapa de crecimiento"
+                },
+                {
+                    "nombre": "Predictivo",
+                    "endpoint": "/predictivo/predict",
+                    "descripcion": "Predice alertas basadas en variables ambientales (temperatura, humedad, suelo, luz)"
                 }
             ]
         }), 200
