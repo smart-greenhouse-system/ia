@@ -248,6 +248,11 @@
         .urgency-dot.alto { background: #fb923c; }
         .urgency-dot.critico { background: #ef4444; }
 
+        table td { padding: 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        table tr:last-child td { border-bottom: none; }
+        table td.critical { color: #ef4444; font-weight: 600; }
+        table td.high { color: #fbbf24; font-weight: 600; }
+
         @media (max-width: 600px) {
             .container { padding: 24px; }
             .input-grid { grid-template-columns: 1fr; }
@@ -297,6 +302,13 @@
                     <label for="sunlight">Iluminación <span class="unit">(µmol/m²/s)</span></label>
                     <input type="number" id="sunlight" step="1" min="0" max="1200" value="400" required>
                 </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#94a3b8; font-size:13px;">
+                    <input type="checkbox" id="toggleTodas">
+                    Mostrar todas las variables fuera de rango
+                </label>
             </div>
 
             <button type="submit" class="btn-predict" id="btnPredict">
@@ -373,11 +385,18 @@
                 resultCard.classList.add('ok');
                 statusBadge.className = 'status-badge ok';
                 statusBadge.textContent = 'OK';
-                resultTitle.textContent = '✅ Condiciones normales';
+                resultTitle.textContent = 'Condiciones normales';
+
+                let extraHtml = '';
+                if (data.todas_las_variables && data.todas_las_variables.length > 0) {
+                    extraHtml = `<div class="result-message">Las variables estan dentro de parametros.</div>`;
+                }
+
                 resultBody.innerHTML = `
                     <div class="result-item"><div class="r-label">Cultivo</div><div class="r-value">${data.cultivo}</div></div>
                     <div class="result-item"><div class="r-label">Etapa</div><div class="r-value">${data.etapa}</div></div>
                     <div class="result-item"><div class="r-label">Estado</div><div class="r-value" style="color:#4ade80">Sin alertas</div></div>
+                    ${extraHtml}
                 `;
                 return;
             }
@@ -385,7 +404,7 @@
             resultCard.classList.add('alerta');
             statusBadge.className = 'status-badge alerta';
             statusBadge.textContent = 'Alerta';
-            resultTitle.textContent = `⚠️ Alerta: ${data.accion.replace(/_/g, ' ')}`;
+            resultTitle.textContent = `Alerta: ${data.accion.replace(/_/g, ' ')}`;
 
             const urgClass = (data.nivel_urgencia || '').toLowerCase();
             const urgVal = data.nivel_urgencia || '—';
@@ -395,7 +414,7 @@
                 variableHtml = `
                     <div class="result-item"><div class="r-label">Variable</div><div class="r-value">${data.variable}</div></div>
                     <div class="result-item"><div class="r-label">Valor actual</div><div class="r-value ${urgClass === 'critico' ? 'critical' : 'high'}">${data.valor_actual}</div></div>
-                    <div class="result-item"><div class="r-label">Rango óptimo</div><div class="r-value">${data.valor_optimo_min} - ${data.valor_optimo_max}</div></div>
+                    <div class="result-item"><div class="r-label">Rango optimo</div><div class="r-value">${data.valor_optimo_min} - ${data.valor_optimo_max}</div></div>
                     <div class="result-item"><div class="r-label">Urgencia</div><div class="r-value ${urgClass === 'critico' ? 'critical' : urgClass === 'alto' ? 'high' : ''}">${urgVal}</div></div>
                 `;
             } else {
@@ -406,9 +425,47 @@
                 `;
             }
 
+            let tablaTodas = '';
+            if (data.todas_las_variables && data.todas_las_variables.length > 0) {
+                let filas = '';
+                const nombreVar = { 'temperatura': 'Temperatura', 'humedad': 'Humedad relativa', 'humedad_suelo': 'Humedad suelo', 'iluminacion': 'Iluminacion' };
+                data.todas_las_variables.forEach(v => {
+                    const uc = (v.nivel_urgencia || '').toLowerCase();
+                    filas += `
+                        <tr>
+                            <td>${nombreVar[v.variable] || v.variable}</td>
+                            <td>${v.valor_actual}</td>
+                            <td>${v.valor_optimo_min} - ${v.valor_optimo_max}</td>
+                            <td class="${uc === 'critico' ? 'critical' : uc === 'alto' ? 'high' : ''}">${v.nivel_urgencia}</td>
+                            <td>${v.accion.replace(/_/g, ' ')}</td>
+                        </tr>
+                    `;
+                });
+                tablaTodas = `
+                    <div style="grid-column:1/-1; margin-top:8px;">
+                        <div style="color:#94a3b8; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Todas las variables fuera de rango</div>
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead>
+                                <tr style="color:#64748b; text-transform:uppercase; font-size:11px; letter-spacing:0.5px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding:8px 10px; text-align:left;">Variable</th>
+                                    <th style="padding:8px 10px; text-align:left;">Actual</th>
+                                    <th style="padding:8px 10px; text-align:left;">Optimo</th>
+                                    <th style="padding:8px 10px; text-align:left;">Urgencia</th>
+                                    <th style="padding:8px 10px; text-align:left;">Accion</th>
+                                </tr>
+                            </thead>
+                            <tbody style="color:#e2e8f0;">
+                                ${filas}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
             resultBody.innerHTML = `
                 ${variableHtml}
-                <div class="result-message">${data.mensaje || 'Se requiere acción correctiva'}</div>
+                <div class="result-message">${data.mensaje || 'Se requiere accion correctiva'}</div>
+                ${tablaTodas}
             `;
         }
 
@@ -426,6 +483,11 @@
                 soil_moisture: parseFloat(document.getElementById('soil_moisture').value),
                 sunlight: parseFloat(document.getElementById('sunlight').value)
             };
+
+            const mostrarTodas = document.getElementById('toggleTodas').checked;
+            if (mostrarTodas) {
+                payload.todas_las_variables = true;
+            }
 
             try {
                 const resp = await fetch('/predictivo/predict', {
