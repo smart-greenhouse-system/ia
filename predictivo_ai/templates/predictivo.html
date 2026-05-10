@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictivo AI - Smart Greenhouse</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        label {
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        label .unit {
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        select, input {
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: #4ade80;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
+        }
+
+        select option { background: #1e293b; }
+
+        .btn-predict {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4ade80, #22d3ee);
+            border: none;
+            border-radius: 12px;
+            color: #0f172a;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -5px rgba(74, 222, 128, 0.3);
+        }
+
+        .btn-predict:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(15, 23, 42, 0.2);
+            border-top-color: #0f172a;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-predict.loading .btn-text { display: none; }
+        .btn-predict.loading .spinner { display: block; }
+
+        .result-card {
+            display: none;
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 16px;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card.ok { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); }
+        .result-card.alerta { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); }
+        .result-card.error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .status-badge {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-badge.ok { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+        .status-badge.alerta { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .status-badge.error { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+        .result-title {
+            color: #e2e8f0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .result-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .result-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+
+        .result-item .r-label {
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-item .r-value {
+            color: #e2e8f0;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .result-item .r-value.high { color: #fbbf24; }
+        .result-item .r-value.critical { color: #ef4444; }
+
+        .result-error-msg {
+            color: #fca5a5;
+            font-size: 14px;
+        }
+
+        .result-message {
+            grid-column: 1 / -1;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .urgency-legend {
+            margin-top: 20px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .urgency-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .urgency-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .urgency-dot.baixo { background: #4ade80; }
+        .urgency-dot.medio { background: #fbbf24; }
+        .urgency-dot.alto { background: #fb923c; }
+        .urgency-dot.critico { background: #ef4444; }
+
+        @media (max-width: 600px) {
+            .container { padding: 24px; }
+            .input-grid { grid-template-columns: 1fr; }
+            .result-body { grid-template-columns: 1fr; }
+            .header h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 Predictivo AI</h1>
+            <p>Sistema de predicción de alertas para invernadero inteligente</p>
+        </div>
+
+        <form id="predictForm">
+            <div class="input-grid">
+                <div class="form-group">
+                    <label for="cultivo">Cultivo</label>
+                    <select id="cultivo" required>
+                        <option value="lechuga">Lechuga</option>
+                        <option value="tomate" selected>Tomate</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="etapa">Etapa fenológica</label>
+                    <select id="etapa" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature">Temperatura <span class="unit">(°C)</span></label>
+                    <input type="number" id="temperature" step="0.1" min="0" max="45" value="25" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="humidity">Humedad relativa <span class="unit">(%)</span></label>
+                    <input type="number" id="humidity" step="0.1" min="0" max="100" value="65" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="soil_moisture">Humedad del suelo <span class="unit">(%)</span></label>
+                    <input type="number" id="soil_moisture" step="0.1" min="0" max="100" value="60" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sunlight">Iluminación <span class="unit">(µmol/m²/s)</span></label>
+                    <input type="number" id="sunlight" step="1" min="0" max="1200" value="400" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-predict" id="btnPredict">
+                <span class="btn-text">🔍 Predecir condiciones</span>
+                <div class="spinner"></div>
+            </button>
+        </form>
+
+        <div class="result-card" id="resultCard">
+            <div class="result-header">
+                <span class="status-badge" id="statusBadge">OK</span>
+                <span class="result-title" id="resultTitle">Condiciones normales</span>
+            </div>
+            <div class="result-body" id="resultBody"></div>
+        </div>
+
+        <div class="urgency-legend">
+            <div class="urgency-item"><div class="urgency-dot baixo"></div> BAJO</div>
+            <div class="urgency-item"><div class="urgency-dot medio"></div> MEDIO</div>
+            <div class="urgency-item"><div class="urgency-dot alto"></div> ALTO</div>
+            <div class="urgency-item"><div class="urgency-dot critico"></div> CRÍTICO</div>
+        </div>
+    </div>
+
+    <script>
+        const ETAPAS = {
+            lechuga: [
+                'Germinacion', 'Plantula', 'CrecimientoVegetativo',
+                'FormacionCabeza', 'Cosecha'
+            ],
+            tomate: [
+                'Germinacion', 'Plantula', 'CrecimientoVegetativo',
+                'Floracion', 'CuajadoFrutos', 'Maduracion'
+            ]
+        };
+
+        const cultivoSelect = document.getElementById('cultivo');
+        const etapaSelect = document.getElementById('etapa');
+        const form = document.getElementById('predictForm');
+        const btn = document.getElementById('btnPredict');
+        const resultCard = document.getElementById('resultCard');
+        const statusBadge = document.getElementById('statusBadge');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultBody = document.getElementById('resultBody');
+
+        function actualizarEtapas() {
+            const cultivo = cultivoSelect.value;
+            etapaSelect.innerHTML = '';
+            ETAPAS[cultivo].forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e;
+                opt.textContent = e;
+                etapaSelect.appendChild(opt);
+            });
+        }
+
+        cultivoSelect.addEventListener('change', actualizarEtapas);
+        actualizarEtapas();
+
+        function mostrarResultado(data) {
+            resultCard.style.display = 'block';
+            resultCard.className = 'result-card';
+
+            if (!data.success) {
+                resultCard.classList.add('error');
+                statusBadge.className = 'status-badge error';
+                statusBadge.textContent = 'Error';
+                resultTitle.textContent = 'Error en la solicitud';
+                resultBody.innerHTML = `<div class="result-error-msg">${data.message}</div>`;
+                return;
+            }
+
+            if (data.status === 'OK') {
+                resultCard.classList.add('ok');
+                statusBadge.className = 'status-badge ok';
+                statusBadge.textContent = 'OK';
+                resultTitle.textContent = '✅ Condiciones normales';
+                resultBody.innerHTML = `
+                    <div class="result-item"><div class="r-label">Cultivo</div><div class="r-value">${data.cultivo}</div></div>
+                    <div class="result-item"><div class="r-label">Etapa</div><div class="r-value">${data.etapa}</div></div>
+                    <div class="result-item"><div class="r-label">Estado</div><div class="r-value" style="color:#4ade80">Sin alertas</div></div>
+                `;
+                return;
+            }
+
+            resultCard.classList.add('alerta');
+            statusBadge.className = 'status-badge alerta';
+            statusBadge.textContent = 'Alerta';
+            resultTitle.textContent = `⚠️ Alerta: ${data.accion.replace(/_/g, ' ')}`;
+
+            const urgClass = (data.nivel_urgencia || '').toLowerCase();
+            const urgVal = data.nivel_urgencia || '—';
+
+            let variableHtml = '';
+            if (data.variable) {
+                variableHtml = `
+                    <div class="result-item"><div class="r-label">Variable</div><div class="r-value">${data.variable}</div></div>
+                    <div class="result-item"><div class="r-label">Valor actual</div><div class="r-value ${urgClass === 'critico' ? 'critical' : 'high'}">${data.valor_actual}</div></div>
+                    <div class="result-item"><div class="r-label">Rango óptimo</div><div class="r-value">${data.valor_optimo_min} - ${data.valor_optimo_max}</div></div>
+                    <div class="result-item"><div class="r-label">Urgencia</div><div class="r-value ${urgClass === 'critico' ? 'critical' : urgClass === 'alto' ? 'high' : ''}">${urgVal}</div></div>
+                `;
+            } else {
+                variableHtml = `
+                    <div class="result-item"><div class="r-label">Urgencia</div><div class="r-value ${urgClass === 'critico' ? 'critical' : 'high'}">${urgVal}</div></div>
+                    <div class="result-item"><div class="r-label">Cultivo</div><div class="r-value">${data.cultivo}</div></div>
+                    <div class="result-item"><div class="r-label">Etapa</div><div class="r-value">${data.etapa}</div></div>
+                `;
+            }
+
+            resultBody.innerHTML = `
+                ${variableHtml}
+                <div class="result-message">${data.mensaje || 'Se requiere acción correctiva'}</div>
+            `;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            btn.classList.add('loading');
+            btn.disabled = true;
+            resultCard.style.display = 'none';
+
+            const payload = {
+                cultivo: cultivoSelect.value,
+                etapa: etapaSelect.value,
+                temperature: parseFloat(document.getElementById('temperature').value),
+                humidity: parseFloat(document.getElementById('humidity').value),
+                soil_moisture: parseFloat(document.getElementById('soil_moisture').value),
+                sunlight: parseFloat(document.getElementById('sunlight').value)
+            };
+
+            try {
+                const resp = await fetch('/predictivo/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                mostrarResultado(data);
+            } catch (err) {
+                resultCard.style.display = 'block';
+                resultCard.className = 'result-card error';
+                statusBadge.className = 'status-badge error';
+                statusBadge.textContent = 'Error';
+                resultTitle.textContent = 'Error de conexión';
+                resultBody.innerHTML = `<div class="result-error-msg">No se pudo conectar con el servidor.</div>`;
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
