@@ -14,7 +14,8 @@ from flask import Blueprint, request, jsonify, render_template
 
 # Importar directamente desde la carpeta del modelo
 sys.path.insert(0, str(Path(__file__).parent.parent / "moneda_ai"))
-from inference import MonedaInference
+from moneda_ai.inference import MonedaInference
+
 
 
 # Crear blueprint con nombre único

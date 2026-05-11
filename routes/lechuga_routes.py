@@ -14,7 +14,7 @@ from flask import Blueprint, request, jsonify, render_template
 
 # Importar directamente desde la carpeta del modelo
 sys.path.insert(0, str(Path(__file__).parent.parent / "lechuga_ai"))
-from inference import LechugaInference
+from lechuga_ai.inference import LechugaInference
 
 
 # Crear blueprint con nombre único

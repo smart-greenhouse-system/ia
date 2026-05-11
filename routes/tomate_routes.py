@@ -13,7 +13,7 @@ from flask import Blueprint, request, jsonify, render_template
 
 # Importar directamente desde la carpeta del modelo
 sys.path.insert(0, str(Path(__file__).parent.parent / "tomate_ai"))
-from inference import TomatoInference
+from tomate_ai.inference import TomatoInference
 
 
 # Crear blueprint con nombre único

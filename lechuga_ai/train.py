@@ -7,7 +7,7 @@ from model import LechugaDetector
 
 BASE_DIR = Path(__file__).parent
 
-detector = LechugaDetector(weights="yolov8n.pt")
+detector = LechugaDetector(weights="yolov8n-seg.pt")
 
 detector.train_model(
     data_yaml=str(BASE_DIR / "dataset" / "data.yaml"),

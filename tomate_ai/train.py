@@ -1,18 +1,11 @@
-# from ultralytics import YOLO
 
-# model = YOLO("yolov8n.pt")
+import sys
+from pathlib import Path
 
-# model.train(
-#     data="dataset/data.yaml",
-#     epochs=50,
-#     imgsz=640,
-#     batch=16,
-#     save=True,
-#     save_period=1
-# } 
-
-
+sys.path.insert(0, str(Path(__file__).parent))
 from ultralytics import YOLO
+
+BASE_DIR = Path(__file__).parent
 
 # ============================================================
 # ENTRENAMIENTO DEL DETECTOR DE TOMATE CHERRY
@@ -29,53 +22,52 @@ from ultralytics import YOLO
 
 # Cargar modelo base preentrenado
 # yolov8n.pt es ligero, rápido y excelente para comenzar.
-model = YOLO("yolov8n.pt")
 
-# Iniciar entrenamiento
-results = model.train(
-    # Archivo de configuración del dataset
-    data="Cherry-Tomato-Plants-1/data.yaml",
+model = YOLO("yolov8s-seg.pt")
 
-    # Número total de épocas
+model.train(
+    data=str(BASE_DIR / "dataset" / "data.yaml"),
+    task="segment",
+
+
     epochs=100,
-
-    # Tamaño de entrada de las imágenes
     imgsz=640,
+    batch=8,
 
-    # Número de imágenes por lote
-    batch=16,
 
-    # Nombre del experimento
-    name="cherry_detector",
+    device=0,
 
-    # Carpeta principal donde se guardará
-    project="runs/detect",
 
-    # Guarda checkpoints automáticamente
     save=True,
+    save_period=5,
+    project=str(BASE_DIR / "runs" / "segment"),
 
-    # Guardar un checkpoint cada 10 épocas
-    save_period=10,
 
-    # Mantener gráficos y métricas
-    plots=True,
+    name="tomato_growth",
 
-    # Permite sobrescribir si existe
-    exist_ok=True,
 
-    # Usa pesos preentrenados
+    patience=20,
     pretrained=True,
+    cache=True,
 
-    # Número de workers para carga de datos
+
+    hsv_h=0.015,
+    hsv_s=0.7,
+    hsv_v=0.4,
+
+    degrees=10,
+    translate=0.1,
+    scale=0.5,
+    fliplr=0.5,
+
+
+    amp=True,
     workers=8,
 
-    # Modo determinístico para reproducibilidad
-    deterministic=True,
 
-    # Semilla aleatoria
-    seed=42
+    plots=True,
+    verbose=True
 )
-
 # ============================================================
 # ARCHIVOS GENERADOS
 # ============================================================
