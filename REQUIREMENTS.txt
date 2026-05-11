@@ -1,10 +1,14 @@
 # Framework web
 flask==3.0.0
+scikit-learn>=1.3.0
 
 # Visión por computadora y modelos
 ultralytics>=8.0.0
 opencv-python>=4.8.0
+pandas>=2.0.0
 numpy>=1.24.0
+
+joblib>=1.3.0
 
 # Machine Learning
 torch>=2.0.0
@@ -14,5 +18,4 @@ roboflow
 python-dotenv
 
 # Opcional pero recomendado para desarrollo
-python-dotenv
 werkzeug>=3.0.0

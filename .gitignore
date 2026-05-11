@@ -5,3 +5,4 @@ Cherry-Tomato-Plants-1/
 image/
 venv/
 venv/*
+/info_project
