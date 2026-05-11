@@ -9,7 +9,7 @@ Rutas:
 import sys
 from pathlib import Path
 
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify
 
 # Importar directamente desde la carpeta del modelo
 sys.path.insert(0, str(Path(__file__).parent.parent / "tomate_ai"))
@@ -47,9 +47,3 @@ def predict_tomate():
     result = modelo_tomate.predict_base64(image_base64)
     
     return jsonify(result)
-
-
-@tomate_bp.errorhandler(404)
-def tomate_not_found(e):
-    """Maneja rutas no encontradas en el blueprint de tomate."""
-    return render_template('404.html'), 404

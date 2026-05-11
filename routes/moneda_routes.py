@@ -10,7 +10,7 @@ Rutas:
 import sys
 from pathlib import Path
 
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify
 
 # Importar directamente desde la carpeta del modelo
 sys.path.insert(0, str(Path(__file__).parent.parent / "moneda_ai"))
@@ -49,9 +49,3 @@ def predict_moneda():
     result = modelo_moneda.predict_base64(image_base64)
     
     return jsonify(result)
-
-
-@moneda_bp.errorhandler(404)
-def moneda_not_found(e):
-    """Maneja rutas no encontradas en el blueprint de moneda."""
-    return render_template('404.html'), 404
