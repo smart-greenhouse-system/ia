@@ -2,6 +2,10 @@ import base64
 import tempfile
 import os
 from ultralytics import YOLO
+from pathlib import Path
+BASE_DIR = Path(__file__).parent
+
+
 
 
 class TomatoInference:
@@ -24,12 +28,8 @@ class TomatoInference:
         # ==========================================
         # MODELO 1: Detector de tomate cherry
         # ==========================================
-        self.detector = YOLO("models/best.pt")
-
-        # ==========================================
-        # MODELO 2: Clasificador de etapas
-        # ==========================================
-        self.growth_model = YOLO("models/detector_best.pt")
+        self.detector = YOLO(str(BASE_DIR / "models" / "best.pt"))
+        self.growth_model = YOLO(str(BASE_DIR / "models" / "detector_best.pt"))
 
         # Umbral mínimo para aceptar detecciones
         self.MIN_CONFIDENCE = 0.75
