@@ -1,9 +1,6 @@
 import torch.nn as nn
 from ultralytics import YOLO
 
-NUM_CLASSES = 3  # Harvest Stage, Seedling Stage, Vegetative Stage
-
-
 class LechugaDetector(nn.Module):
 
     def __init__(self, weights="yolov8n-seg.pt"):

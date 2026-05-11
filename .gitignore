@@ -1,8 +1,6 @@
 __pycache__/
 *.pyc
-runs/
-Cherry-Tomato-Plants-1/
 image/
+models/*.pt
 venv/
 venv/*
-/info_project

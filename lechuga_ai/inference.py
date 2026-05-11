@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from lechuga_ai.model import LechugaDetector
+from model import LechugaDetector
 
 BASE_DIR = Path(__file__).parent
 
@@ -16,7 +16,6 @@ class LechugaInference:
 
     def __init__(self):
         self.detector = LechugaDetector(weights=str(BASE_DIR / "models" / "best.pt"))
-
 
     def _decode_image(self, image_base64):
         if "," in image_base64:
@@ -29,7 +28,7 @@ class LechugaInference:
         temp.close()
 
         return temp.name
-    
+
     def _encode_image(self, img_array):
         _, buffer = cv2.imencode(".jpg", img_array)
         return base64.b64encode(buffer).decode("utf-8")

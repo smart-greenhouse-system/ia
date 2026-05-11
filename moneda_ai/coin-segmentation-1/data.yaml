@@ -1,0 +1,12 @@
+names:
+- Coin
+nc: 1
+roboflow:
+  license: CC BY 4.0
+  project: coin-segmentation-8ah7d
+  url: https://universe.roboflow.com/bin-mibxd/coin-segmentation-8ah7d/dataset/1
+  version: 1
+  workspace: bin-mibxd
+test: ../test/images
+train: ../train/images
+val: ../valid/images

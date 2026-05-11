@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Tomato AI</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+
+            font-family: Arial, sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f3f7f4,
+                    #dff1e3
+                );
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        .container{
+
+            max-width:1400px;
+
+            margin:auto;
+
+            background:white;
+
+            border-radius:20px;
+
+            padding:30px;
+
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        .title{
+
+            text-align:center;
+
+            margin-bottom:30px;
+        }
+
+        .title h1{
+
+            font-size:42px;
+
+            color:#1f6d36;
+
+            margin-bottom:10px;
+        }
+
+        .title p{
+
+            color:#666;
+
+            font-size:17px;
+        }
+
+        .upload-section{
+
+            background:#f8faf9;
+
+            border:2px dashed #b6d7c0;
+
+            border-radius:20px;
+
+            padding:30px;
+
+            text-align:center;
+
+            margin-bottom:30px;
+        }
+
+        input[type="file"]{
+
+            padding:12px;
+
+            background:white;
+
+            border-radius:10px;
+
+            border:1px solid #ddd;
+
+            width:300px;
+
+            max-width:100%;
+        }
+
+        button{
+
+            margin-top:20px;
+
+            padding:14px 30px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#1e8e3e;
+
+            color:white;
+
+            font-size:16px;
+
+            font-weight:bold;
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        button:hover{
+
+            transform:translateY(-2px);
+
+            background:#176d31;
+        }
+
+        .loading{
+
+            margin-top:15px;
+
+            color:#ff9800;
+
+            font-weight:bold;
+        }
+
+        .error{
+
+            margin-top:15px;
+
+            color:red;
+
+            font-weight:bold;
+        }
+
+        .main-grid{
+
+            display:grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:25px;
+
+            margin-top:30px;
+        }
+
+        .card{
+
+            background:#fff;
+
+            border-radius:18px;
+
+            padding:20px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.05);
+
+            border:1px solid #eee;
+        }
+
+        .card h2{
+
+            margin-bottom:20px;
+
+            color:#1f6d36;
+        }
+
+        .image-box{
+
+            width:100%;
+
+            min-height:350px;
+
+            background:#f7f7f7;
+
+            border-radius:15px;
+
+            overflow:hidden;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+        }
+
+        .image-box img{
+
+            width:100%;
+
+            object-fit:contain;
+        }
+
+        .stats-grid{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap:15px;
+        }
+
+        .stat{
+
+            background:#f8faf9;
+
+            border-radius:14px;
+
+            padding:18px;
+
+            border:1px solid #e3e3e3;
+        }
+
+        .stat-title{
+
+            color:#666;
+
+            font-size:14px;
+
+            margin-bottom:8px;
+        }
+
+        .stat-value{
+
+            font-size:22px;
+
+            font-weight:bold;
+
+            color:#1f6d36;
+        }
+
+        .tomatoes{
+
+            margin-top:30px;
+        }
+
+        .tomato-card{
+
+            background:#fafafa;
+
+            border-radius:15px;
+
+            padding:20px;
+
+            margin-top:15px;
+
+            border:1px solid #e7e7e7;
+        }
+
+        .tomato-card h3{
+
+            color:#c62828;
+
+            margin-bottom:10px;
+        }
+
+        .badge{
+
+            display:inline-block;
+
+            background:#1e8e3e;
+
+            color:white;
+
+            padding:6px 12px;
+
+            border-radius:30px;
+
+            font-size:13px;
+
+            margin-top:8px;
+        }
+
+        .json-viewer{
+
+            background:#1e1e1e;
+
+            color:#d4d4d4;
+
+            border-radius:12px;
+
+            padding:20px;
+
+            font-family: monospace;
+
+            font-size:14px;
+
+            white-space: pre;
+
+            overflow-x: auto;
+
+            max-height:300px;
+
+            overflow-y: auto;
+        }
+
+        @media(max-width:900px){
+
+            .main-grid{
+
+                grid-template-columns:1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="title">
+
+        <h1>🍅 Tomato AI</h1>
+
+        <p>
+            Detección, segmentación y análisis
+            inteligente de tomates cherry
+        </p>
+
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="upload-section">
+
+        <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+        >
+
+        <br>
+
+        <button onclick="sendImage()">
+            Analizar Imagen
+        </button>
+
+        <div
+            id="loading"
+            class="loading">
+        </div>
+
+        <div
+            id="error"
+            class="error">
+        </div>
+
+    </div>
+
+    <!-- IMÁGENES -->
+    <div class="main-grid">
+
+        <!-- ORIGINAL -->
+        <div class="card">
+
+            <h2>📷 Imagen Original</h2>
+
+            <div class="image-box">
+
+                <img id="originalImage">
+
+            </div>
+
+        </div>
+
+        <!-- RESULTADO -->
+        <div class="card">
+
+            <h2>🧠 Resultado IA</h2>
+
+            <div class="image-box">
+
+                <img id="annotatedImage">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="card"
+         style="margin-top:30px;">
+
+        <h2>📊 Resultados Generales</h2>
+
+        <div class="stats-grid">
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    Total tomates
+                </div>
+
+                <div class="stat-value"
+                     id="totalTomates">
+                    0
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    Estado crecimiento
+                </div>
+
+                <div class="stat-value"
+                     id="estado">
+                    N/A
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    Confianza IA
+                </div>
+
+                <div class="stat-value"
+                     id="confianza">
+                    0%
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-title">
+                    Días cosecha
+                </div>
+
+                <div class="stat-value"
+                     id="dias">
+                    0
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JSON -->
+    <div class="card"
+         style="margin-top:30px;">
+
+        <h2>📋 Respuesta JSON</h2>
+
+        <div class="json-viewer"
+             id="jsonViewer">
+            Aqui aparecera la respuesta del modelo...
+        </div>
+
+    </div>
+
+    <!-- TOMATES -->
+    <div class="card tomatoes">
+
+        <h2>🍅 Tomates Detectados</h2>
+
+        <div id="tomatoesContainer">
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    // ==========================================
+    // BASE64
+    // ==========================================
+    function toBase64(file){
+
+        return new Promise((resolve,reject)=>{
+
+            const reader = new FileReader();
+
+            reader.readAsDataURL(file);
+
+            reader.onload = () => resolve(reader.result);
+
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // ==========================================
+    // LIMPIAR
+    // ==========================================
+    function clearUI(){
+
+        document.getElementById(
+            "error"
+        ).innerText = "";
+
+        document.getElementById(
+            "loading"
+        ).innerText = "";
+
+        document.getElementById(
+            "tomatoesContainer"
+        ).innerHTML = "";
+
+        document.getElementById(
+            "estado"
+        ).innerText = "N/A";
+
+        document.getElementById(
+            "confianza"
+        ).innerText = "0%";
+
+        document.getElementById(
+            "dias"
+        ).innerText = "0";
+
+        document.getElementById(
+            "totalTomates"
+        ).innerText = "0";
+
+        document.getElementById(
+            "jsonViewer"
+        ).innerText =
+            "Aqui aparecera la respuesta del modelo...";
+    }
+
+    // ==========================================
+    // ENVIAR IMAGEN
+    // ==========================================
+    async function sendImage(){
+
+        clearUI();
+
+        const file =
+            document.getElementById(
+                "fileInput"
+            ).files[0];
+
+        if(!file){
+
+            alert("Selecciona una imagen");
+
+            return;
+        }
+
+        // loading
+        document.getElementById(
+            "loading"
+        ).innerText =
+            "⏳ Analizando imagen...";
+
+        // preview
+        document.getElementById(
+            "originalImage"
+        ).src =
+            URL.createObjectURL(file);
+
+        try{
+
+            const base64 =
+                await toBase64(file);
+
+            const response =
+                await fetch("/predict",{
+
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                        "application/json"
+                    },
+
+                    body:JSON.stringify({
+                        image:base64
+                    })
+                });
+
+            const data =
+                await response.json();
+
+            document.getElementById(
+                "loading"
+            ).innerText = "";
+
+            // error backend
+            if(!data.success){
+
+                document.getElementById(
+                    "error"
+                ).innerText =
+                    data.message;
+
+                return;
+            }
+
+            // imagen IA
+            if(data.annotated_image){
+
+                document.getElementById(
+                    "annotatedImage"
+                ).src =
+                    "data:image/jpeg;base64," +
+                    data.annotated_image;
+            }
+
+            // total tomates
+            document.getElementById(
+                "totalTomates"
+            ).innerText =
+                data.total_tomates || 0;
+
+            // etapas
+            if(
+                data.etapas_detectadas &&
+                data.etapas_detectadas.length > 0
+            ){
+
+                const etapa =
+                    data.etapas_detectadas[0];
+
+                document.getElementById(
+                    "estado"
+                ).innerText =
+                    etapa.estado;
+
+                document.getElementById(
+                    "confianza"
+                ).innerText =
+                    (
+                        etapa.confianza * 100
+                    ).toFixed(1) + "%";
+
+                document.getElementById(
+                    "dias"
+                ).innerText =
+                    etapa.dias_cosecha;
+            }
+
+            // json
+            const display = {...data};
+            delete display.annotated_image;
+            document.getElementById(
+                "jsonViewer"
+            ).innerText =
+                JSON.stringify(display, null, 2);
+
+            // tomates
+            const container =
+                document.getElementById(
+                    "tomatoesContainer"
+                );
+
+            data.tomates.forEach(tomato => {
+
+                const medidas =
+                    tomato.medidas || {};
+
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "tomato-card";
+
+                card.innerHTML = `
+
+                    <h3>
+                        Tomate #${tomato.id}
+                    </h3>
+
+                    <p>
+                        <strong>
+                            Confianza:
+                        </strong>
+
+                        ${tomato.confianza}
+                    </p>
+
+                    <p>
+                        <strong>
+                            Área:
+                        </strong>
+
+                        ${medidas.area_px || 0} px²
+                    </p>
+
+                    <p>
+                        <strong>
+                            Diámetro:
+                        </strong>
+
+                        ${medidas.diametro_px || 0} px
+                    </p>
+
+                    <p>
+                        <strong>
+                            Ancho:
+                        </strong>
+
+                        ${medidas.width_px || 0} px
+                    </p>
+
+                    <p>
+                        <strong>
+                            Alto:
+                        </strong>
+
+                        ${medidas.height_px || 0} px
+                    </p>
+
+                    <div class="badge">
+                        Detectado correctamente
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+        }catch(error){
+
+            document.getElementById(
+                "loading"
+            ).innerText = "";
+
+            document.getElementById(
+                "error"
+            ).innerText =
+                "Error conectando con Flask";
+
+            console.error(error);
+        }
+    }
+
+</script>
+
+</body>
+</html>

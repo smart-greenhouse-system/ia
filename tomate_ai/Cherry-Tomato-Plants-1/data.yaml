@@ -1,0 +1,16 @@
+names:
+- EndEffector
+- Obstacle
+- Soilbag
+- Tomato
+- plant
+nc: 5
+roboflow:
+  license: CC BY 4.0
+  project: cherry-tomato-plants
+  url: https://universe.roboflow.com/plantdetection-fcner/cherry-tomato-plants/dataset/1
+  version: 1
+  workspace: plantdetection-fcner
+test: ../test/images
+train: ../train/images
+val: ../valid/images

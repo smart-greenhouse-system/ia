@@ -10,7 +10,11 @@ BASE_DIR = Path(__file__).parent
 detector = MonedaDetector(weights="yolov8n-seg.pt")
 
 detector.train_model(
+
     data_yaml=str(BASE_DIR / "dataset" / "data.yaml"),
+
+    data_yaml="coin-segmentation-1/data.yaml",
+
     epochs=50,
     imgsz=640,
     batch=16
