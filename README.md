@@ -1,6 +1,6 @@
 # 🎯 API Unificada de Modelos de IA
 
-Aplicación Flask que integra tres modelos de IA independientes (Lechuga, Moneda, Tomate) en una sola API con endpoints específicos para cada modelo.
+Aplicación Flask que integra modelos de Inteligencia Artificial para detección de cultivos, identificación de estados de crecimiento y predicción de comportamientos en base a variables.
 
 ---
 
@@ -24,46 +24,8 @@ Aplicación Flask que integra tres modelos de IA independientes (Lechuga, Moneda
 - **Ultralytics:** 8.0.0+
 - **Python:** 3.8+
 
-
-## 🏗️ Arquitectura
-
-
-### 1 aplicación unificada
-```
-app.py
-  ├── /lechuga/predict   (LechugaInference)
-  ├── /moneda/predict    (MonedaInference)
-  └── /tomate/predict    (TomatoInference)
-  
-  :5000
 ```
 
----
-
-## 📁 Estructura de Archivos
-
-```
-.
-├── app.py              # 🔴 ARCHIVO PRINCIPAL
-├── MANUAL_INSTALACION.md      # Guía paso a paso
-├── REQUIREMENTS.txt           # Dependencias
-│
-├── routes/                     # 🔴 BLUEPRINTS DE MODELOS
-│   ├── __init__.py
-│   ├── lechuga_routes.py      # Endpoints de lechuga
-│   ├── moneda_routes.py       # Endpoints de moneda
-│   └── tomate_routes.py       # Endpoints de tomate
-│
-├── lechuga_ai/                
-├── moneda_ai/                 
-├── tomate_ai/                 
-│
-└── templates/                
-    ├── index.html
-    └── 404.html
-```
-
----
 
 ## 🚀 Inicio Rápido
 
@@ -83,77 +45,6 @@ pip install -r REQUIREMENTS.txt
 ### 3️⃣ Ejecutar Aplicación
 ```bash
 python app.py
-```
-
-### 4️⃣ Probar Endpoints
-```bash
-# Información general
-curl http://localhost:5000/
-
-# Predicción de lechuga
-curl -X POST http://localhost:5000/lechuga/predict \
-  -H "Content-Type: application/json" \
-  -d '{"image": "BASE64_STRING"}'
-```
-
----
-
-## 📡 Endpoints Disponibles
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/` | Información general de la API |
-| `POST` | `/lechuga/predict` | Predicción de etapa lechuga |
-| `POST` | `/moneda/predict` | Predicción de monedas |
-| `POST` | `/tomate/predict` | Predicción etapa tomate |
-
----
-
-## 🎨 Estructura de Requests
-
-### Request (POST a cualquier /*/predict)
-```json
-{
-  "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-}
-```
-
-### Response (exitosa)
-```json
-Toca cuadrar bien
-```
-
-### Response (error)
-```json
-{
-  "success": false,
-  "message": "No se recibió imagen en formato JSON"
-}
-```
-
----
-
-## 🔍 ¿Cómo Funciona?
-
-### 1. Blueprints de Flask
-Cada modelo es un "blueprint" (sub-aplicación):
-- Los blueprints se registran con prefijos únicos
-- Permiten mantener código modular y escalable
-- Cada blueprint importa su respectiva clase Inference
-
-### 2. Clases de Inference
-Cada carpeta de modelo contiene:
-- `inference.py` → Carga modelo y realiza predicción
-- `model.py` → Arquitectura del modelo
-- `utils/` → Funciones de preprocesamiento
-- `models/` → Pesos entrenados (.pt)
-
-### 3. Rutas Dinámicas
-```python
-# En app.py
-app.register_blueprint(lechuga_bp, url_prefix='/lechuga')
-# Convierte:
-#   /lechuga/predict  → lechuga_routes.py:predict_lechuga()
 ```
 
 ## 📚 Documentación Adicional
