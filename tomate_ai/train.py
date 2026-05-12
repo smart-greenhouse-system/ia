@@ -97,53 +97,112 @@
 # print("Mejor modelo: runs/detect/cherry_detector/weights/best.pt")
 # print("Último modelo: runs/detect/cherry_detector/weights/last.pt")
 
+# MODELO DE SEGMENTACIÓN DE PLANTAS DE TOMATE CHERRY
+
+# """ from ultralytics import YOLO
+
+# # Modelo base
+# model = YOLO("yolov8s-seg.pt")
+
+# # Entrenamiento
+# model.train(
+#     data="cherry-tomato-4/data.yaml",
+#     task="segment",
+
+#     # Entrenamiento
+#     epochs=100,
+#     imgsz=640,
+#     batch=8,
+
+#     # GPU
+#     device=0,
+
+#     # Guardado
+#     save=True,
+#     save_period=5,
+
+#     # Proyecto
+#     project="runs/segment",
+#     name="tomato_growth",
+
+#     # Mejoras entrenamiento
+#     patience=20,
+#     pretrained=True,
+#     cache=True,
+
+#     # Data augmentation
+#     hsv_h=0.015,
+#     hsv_s=0.7,
+#     hsv_v=0.4,
+
+#     degrees=10,
+#     translate=0.1,
+#     scale=0.5,
+#     fliplr=0.5,
+
+#     # Optimizaciones
+#     amp=True,
+#     workers=8,
+
+#     # Visualización
+#     plots=True,
+#     verbose=True
+# ) """
+
+
+# MODELO DE CLASIFICACION DE TOMATE CHERRY
 
 from ultralytics import YOLO
+from pathlib import Path
+import torch
 
-# Modelo base
-model = YOLO("yolov8s-seg.pt")
+BASE_DIR = Path(
+    "/home/pablo/Documents/Python/crecimiento/tomate_ai"
+)
 
-# Entrenamiento
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+model = YOLO("yolov8n.pt")
+
 model.train(
-    data="cherry-tomato-4/data.yaml",
-    task="segment",
 
-    # Entrenamiento
-    epochs=100,
+    data=str(
+        BASE_DIR
+        / "cherry-tomato-classification-2"
+        / "data.yaml"
+    ),
+
+    task="detect",
+
+    epochs=50,
     imgsz=640,
-    batch=8,
+    batch=16,
 
-    # GPU
-    device=0,
+    device=DEVICE,
 
-    # Guardado
+    project=str(BASE_DIR / "runs/detect"),
+    name="tomato_state_detector",
+
     save=True,
     save_period=5,
 
-    # Proyecto
-    project="runs/segment",
-    name="tomato_growth",
-
-    # Mejoras entrenamiento
-    patience=20,
     pretrained=True,
-    cache=True,
+    patience=10,
 
-    # Data augmentation
-    hsv_h=0.015,
-    hsv_s=0.7,
-    hsv_v=0.4,
+    optimizer="AdamW",
+    lr0=0.001,
 
-    degrees=10,
-    translate=0.1,
-    scale=0.5,
-    fliplr=0.5,
-
-    # Optimizaciones
     amp=True,
-    workers=8,
+    workers=4,
 
-    # Visualización
     plots=True,
-    verbose=True
+    verbose=True,
+
+    exist_ok=True
+)
+
+print("\nModelo guardado en:")
+print(
+    BASE_DIR
+    / "runs/detect/tomato_state_detector/weights/best.pt"
 )
