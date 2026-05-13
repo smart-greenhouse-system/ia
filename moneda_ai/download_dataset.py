@@ -50,23 +50,51 @@
 #     dataset.location
 # )
 
+# MODELO DE SEGMENTACIÓN DE MONEDAS
 
+# from roboflow import Roboflow
+
+# rf = Roboflow(
+#     api_key="API_KEY"
+# )
+
+# project = rf.workspace(
+#     "buu-ovf24"
+# ).project(
+#     "coin-1nyzl"
+# )
+
+# version = project.version(1)
+
+# dataset = version.download(
+#     "yolov8"
+# )
+
+# print(dataset.location)
+
+# MODELO DE SEGMENTACION DE CARTAS POKEMON
+from pathlib import Path
 from roboflow import Roboflow
 
+# Carpeta del proyecto "moneda_ai"
+BASE_DIR = Path(__file__).parent
+
 rf = Roboflow(
-    api_key="API_KEY"
+    api_key="TQJwc8CVCEjpmYXuBbAt"
 )
 
 project = rf.workspace(
-    "buu-ovf24"
+    "nandersen"
 ).project(
-    "coin-1nyzl"
+    "card-seg-j74w1"
 )
 
-version = project.version(1)
+version = project.version(10)
 
 dataset = version.download(
-    "yolov8"
+    "yolov8",
+    location=str(BASE_DIR)
 )
 
 print(dataset.location)
+

@@ -4,4 +4,3 @@ image/
 models/*.pt
 venv/
 venv/*
-

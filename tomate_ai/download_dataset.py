@@ -80,4 +80,3 @@ dataset = version.download("yolov8")
 
 
 print("Dataset descargado en:", dataset.location)
-

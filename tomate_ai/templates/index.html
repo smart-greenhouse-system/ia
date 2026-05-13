@@ -346,7 +346,6 @@
 
 <div class="container">
 
-    <!-- HEADER -->
     <div class="title">
 
         <h1>🍅 Tomato AI</h1>
@@ -359,7 +358,6 @@
 
     </div>
 
-    <!-- UPLOAD -->
     <div class="upload-section">
 
         <input
@@ -386,10 +384,8 @@
 
     </div>
 
-    <!-- IMÁGENES -->
     <div class="main-grid">
 
-        <!-- ORIGINAL -->
         <div class="card">
 
             <h2>📷 Imagen Original</h2>
@@ -402,7 +398,6 @@
 
         </div>
 
-        <!-- IA -->
         <div class="card">
 
             <h2>🧠 Resultado IA</h2>
@@ -417,7 +412,6 @@
 
     </div>
 
-    <!-- ESTADÍSTICAS -->
     <div
         class="card"
         style="margin-top:30px;"
@@ -491,8 +485,7 @@
 
     </div>
 
-    <!-- TOMATES -->
-    <div class="card tomatoes">
+    <div class="card">
 
         <h2>🍅 Tomates Detectados</h2>
 
@@ -502,7 +495,6 @@
 
     </div>
 
-    <!-- JSON -->
     <div class="card">
 
         <h2>🧾 JSON Predicción</h2>
@@ -521,9 +513,6 @@ Esperando resultados...
 
 <script>
 
-    // ==========================================
-    // BASE64
-    // ==========================================
     function toBase64(file){
 
         return new Promise((resolve,reject)=>{
@@ -539,9 +528,6 @@ Esperando resultados...
         });
     }
 
-    // ==========================================
-    // LIMPIAR UI
-    // ==========================================
     function clearUI(){
 
         document.getElementById(
@@ -578,9 +564,6 @@ Esperando resultados...
             "Esperando resultados...";
     }
 
-    // ==========================================
-    // ENVIAR IMAGEN
-    // ==========================================
     async function sendImage(){
 
         clearUI();
@@ -599,17 +582,11 @@ Esperando resultados...
             return;
         }
 
-        // ==============================
-        // LOADING
-        // ==============================
         document.getElementById(
             "loading"
         ).innerText =
             "⏳ Analizando imagen...";
 
-        // ==============================
-        // PREVIEW ORIGINAL
-        // ==============================
         document.getElementById(
             "originalImage"
         ).src =
@@ -617,15 +594,9 @@ Esperando resultados...
 
         try{
 
-            // ==============================
-            // BASE64
-            // ==============================
             const base64 =
                 await toBase64(file);
 
-            // ==============================
-            // FETCH
-            // ==============================
             const response =
                 await fetch("/predict",{
 
@@ -637,15 +608,10 @@ Esperando resultados...
                     },
 
                     body:JSON.stringify({
-
                         image:base64
-
                     })
                 });
 
-            // ==============================
-            // JSON
-            // ==============================
             const data =
                 await response.json();
 
@@ -653,22 +619,16 @@ Esperando resultados...
                 "loading"
             ).innerText = "";
 
-            // ==============================
-            // ERROR
-            // ==============================
             if(!data.success){
 
                 document.getElementById(
                     "error"
                 ).innerText =
-                    data.message;
+                    data.message || data.error;
 
                 return;
             }
 
-            // ==============================
-            // SOLO RESULTADOS PREDICHOS
-            // ==============================
             const cleanJSON = {
 
                 total_tomates:
@@ -686,11 +646,9 @@ Esperando resultados...
                 tomates:
                     data.tomates.map(t => ({
 
-                        id:
-                            t.id,
+                        id:t.id,
 
-                        confianza:
-                            t.confianza,
+                        confianza:t.confianza,
 
                         area_px:
                             t.medidas?.area_px,
@@ -706,13 +664,9 @@ Esperando resultados...
 
                         diametro_real_cm:
                             t.medidas?.diametro_real_cm
-
                     }))
             };
 
-            // ==============================
-            // JSON FRONTEND
-            // ==============================
             document.getElementById(
                 "jsonOutput"
             ).textContent =
@@ -722,9 +676,6 @@ Esperando resultados...
                     4
                 );
 
-            // ==============================
-            // IMAGEN IA
-            // ==============================
             if(data.annotated_image){
 
                 document.getElementById(
@@ -734,17 +685,11 @@ Esperando resultados...
                     data.annotated_image;
             }
 
-            // ==============================
-            // TOTAL TOMATES
-            // ==============================
             document.getElementById(
                 "totalTomates"
             ).innerText =
                 data.total_tomates || 0;
 
-            // ==============================
-            // CRECIMIENTO
-            // ==============================
             if(
                 data.etapas_detectadas &&
                 data.etapas_detectadas.length > 0
@@ -771,9 +716,6 @@ Esperando resultados...
                     etapa.dias_cosecha;
             }
 
-            // ==============================
-            // MONEDA
-            // ==============================
             let monedaTexto =
                 "No detectada";
 
@@ -783,9 +725,6 @@ Esperando resultados...
                     "Detectada";
             }
 
-            // ==============================
-            // TOMATES
-            // ==============================
             const container =
                 document.getElementById(
                     "tomatoesContainer"

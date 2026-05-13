@@ -9,7 +9,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from model import MonedaDetector
+from moneda_ai.model import MonedaDetector
 
 BASE_DIR = Path(__file__).parent
 

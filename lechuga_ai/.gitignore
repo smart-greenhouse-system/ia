@@ -1,6 +1,6 @@
 .env
 dataset/
-models/
 runs/
 __pycache__/
 *.pt
+!models/best.pt
