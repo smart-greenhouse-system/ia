@@ -80,7 +80,7 @@ from roboflow import Roboflow
 BASE_DIR = Path(__file__).parent
 
 rf = Roboflow(
-    api_key="TQJwc8CVCEjpmYXuBbAt"
+    api_key="API_KEY"
 )
 
 project = rf.workspace(
