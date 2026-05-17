@@ -1,7 +1,0 @@
-ultralytics
-flask
-opencv-python
-numpy
-torch
-roboflow
-python-dotenv

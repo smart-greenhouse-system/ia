@@ -19,10 +19,6 @@ class TomatoInference:
 
         self.BASE_DIR = Path(__file__).resolve().parent
 
-        self.MONEDA_DIR = (
-            self.BASE_DIR.parent / "moneda_ai"
-        )
-
         # ==================================================
         # DEVICE
         # ==================================================
@@ -65,16 +61,7 @@ class TomatoInference:
             / "best.pt"
         )
 
-        self.CARD_MODEL_PATH = (
-            self.MONEDA_DIR
-            / "runs"
-            / "segment"
-            / "runs"
-            / "segment"
-            / "coin_segmentation"
-            / "weights"
-            / "best.pt"
-        )
+        self.CARD_MODEL_PATH = None
 
         # ==================================================
         # VALIDATE MODELS
@@ -83,7 +70,6 @@ class TomatoInference:
         self._validate_model(self.SEGMENT_MODEL_PATH)
         self._validate_model(self.GROWTH_MODEL_PATH)
         self._validate_model(self.CLASSIFY_MODEL_PATH)
-        self._validate_model(self.CARD_MODEL_PATH)
 
         # ==================================================
         # LOAD MODELS
@@ -103,9 +89,8 @@ class TomatoInference:
             str(self.CLASSIFY_MODEL_PATH)
         )
 
-        self.card_model = YOLO(
-            str(self.CARD_MODEL_PATH)
-        )
+        self.card_model = None
+        print("⚠️  Card model no disponible, medidas reales deshabilitadas")
 
         print("✅ Models loaded")
 
@@ -276,6 +261,9 @@ class TomatoInference:
     # ======================================================
 
     def _detect_card(self, image_path):
+
+        if self.card_model is None:
+            return None
 
         results = self.card_model.predict(
 
