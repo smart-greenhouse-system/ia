@@ -1,6 +1,7 @@
 import torch.nn as nn
 from ultralytics import YOLO
 
+
 class LechugaDetector(nn.Module):
 
     def __init__(self, weights="yolov8n-seg.pt"):
@@ -10,18 +11,19 @@ class LechugaDetector(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-    def train_model(self, data_yaml, epochs=50, imgsz=640, batch=16):
+    def train_model(self, data_yaml, epochs=50, imgsz=640, batch=16, plots=True):
         return self.model.train(
             data=data_yaml,
             task="segment",
             epochs=epochs,
             imgsz=imgsz,
             batch=batch,
+            plots=plots,
             save=True,
             save_period=1
         )
 
-    def predict(self, source, conf=0.25):
+    def predict(self, source, conf=0.5):
         return self.model(source, conf=conf)
 
     def save(self, path):
