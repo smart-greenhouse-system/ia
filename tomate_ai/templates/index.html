@@ -10,7 +10,23 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Tomato AI</title>
+    <title>Tomato AI Vision</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
     <style>
 
@@ -20,16 +36,39 @@
             box-sizing:border-box;
         }
 
+        :root{
+
+            --primary:#16a34a;
+            --primary-dark:#166534;
+
+            --secondary:#ef4444;
+
+            --bg:#f3f7f4;
+
+            --card:#ffffff;
+
+            --text:#111827;
+
+            --muted:#6b7280;
+
+            --border:#e5e7eb;
+
+            --shadow:
+                0 10px 30px rgba(0,0,0,0.08);
+        }
+
         body{
 
-            font-family:Arial,sans-serif;
+            font-family:"Inter",sans-serif;
 
             background:
-                linear-gradient(
-                    135deg,
-                    #f3f7f4,
-                    #dff1e3
+                radial-gradient(
+                    circle at top left,
+                    #ecfff3,
+                    #f3f7f4
                 );
+
+            color:var(--text);
 
             min-height:100vh;
 
@@ -38,301 +77,559 @@
 
         .container{
 
-            max-width:1500px;
-
+            max-width:1600px;
             margin:auto;
+        }
+
+        .hero{
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #14532d,
+                    #16a34a
+                );
+
+            border-radius:30px;
+
+            padding:45px;
+
+            color:white;
+
+            margin-bottom:30px;
+
+            position:relative;
+
+            overflow:hidden;
+
+            box-shadow:
+                0 20px 60px rgba(22,163,74,0.25);
+        }
+
+        .hero::before{
+
+            content:"";
+
+            position:absolute;
+
+            width:500px;
+            height:500px;
+
+            border-radius:50%;
+
+            background:
+                rgba(255,255,255,0.08);
+
+            top:-220px;
+            right:-180px;
+        }
+
+        .hero h1{
+
+            font-size:54px;
+
+            font-weight:800;
+
+            margin-bottom:12px;
+
+            position:relative;
+            z-index:2;
+        }
+
+        .hero p{
+
+            max-width:900px;
+
+            line-height:1.7;
+
+            opacity:0.95;
+
+            font-size:17px;
+
+            position:relative;
+            z-index:2;
+        }
+
+        .top-grid{
+
+            display:grid;
+
+            grid-template-columns:
+                400px 1fr;
+
+            gap:24px;
+
+            margin-bottom:25px;
+        }
+
+        .card{
 
             background:white;
 
+            border-radius:24px;
+
+            padding:25px;
+
+            border:1px solid var(--border);
+
+            box-shadow:var(--shadow);
+        }
+
+        .card-title{
+
+            margin-bottom:20px;
+        }
+
+        .card-title h2{
+
+            color:var(--primary-dark);
+
+            font-size:25px;
+        }
+
+        .upload-box{
+
+            background:#f0fdf4;
+
+            border:2px dashed #bbf7d0;
+
             border-radius:20px;
 
             padding:30px;
 
-            box-shadow:
-                0 10px 40px rgba(0,0,0,0.08);
-        }
-
-        .title{
-
             text-align:center;
-
-            margin-bottom:30px;
         }
 
-        .title h1{
+        .upload-icon{
 
-            font-size:42px;
+            font-size:60px;
 
-            color:#1f6d36;
+            margin-bottom:15px;
+        }
+
+        .upload-box h3{
 
             margin-bottom:10px;
+
+            color:var(--primary-dark);
         }
 
-        .title p{
+        .upload-box p{
 
-            color:#666;
+            color:var(--muted);
 
-            font-size:17px;
-        }
+            line-height:1.6;
 
-        .upload-section{
-
-            background:#f8faf9;
-
-            border:2px dashed #b6d7c0;
-
-            border-radius:20px;
-
-            padding:30px;
-
-            text-align:center;
-
-            margin-bottom:30px;
+            margin-bottom:20px;
         }
 
         input[type="file"]{
 
-            padding:12px;
+            width:100%;
+
+            padding:14px;
+
+            border-radius:14px;
+
+            border:1px solid var(--border);
+
+            margin-bottom:18px;
 
             background:white;
-
-            border-radius:10px;
-
-            border:1px solid #ddd;
-
-            width:320px;
-
-            max-width:100%;
         }
 
         button{
 
-            margin-top:20px;
-
-            padding:14px 30px;
+            width:100%;
 
             border:none;
 
-            border-radius:12px;
+            border-radius:16px;
 
-            background:#1e8e3e;
-
-            color:white;
-
-            font-size:16px;
-
-            font-weight:bold;
+            padding:16px;
 
             cursor:pointer;
 
-            transition:0.3s;
+            color:white;
+
+            font-weight:700;
+
+            font-size:16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #16a34a,
+                    #22c55e
+                );
+
+            transition:0.25s;
         }
 
         button:hover{
 
             transform:translateY(-2px);
 
-            background:#176d31;
+            box-shadow:
+                0 10px 25px rgba(34,197,94,0.25);
+        }
+
+        .loading,
+        .error{
+
+            display:none;
+
+            margin-top:16px;
+
+            padding:14px;
+
+            border-radius:14px;
+
+            font-weight:600;
         }
 
         .loading{
 
-            margin-top:15px;
+            background:#fef3c7;
 
-            color:#ff9800;
-
-            font-weight:bold;
+            color:#92400e;
         }
 
         .error{
 
-            margin-top:15px;
+            background:#fee2e2;
 
-            color:red;
-
-            font-weight:bold;
+            color:#991b1b;
         }
 
-        .main-grid{
+        .preview-grid{
 
             display:grid;
 
             grid-template-columns:
                 1fr 1fr;
 
-            gap:25px;
-
-            margin-top:30px;
+            gap:20px;
         }
 
-        .card{
+        .image-card{
 
-            background:#fff;
+            background:white;
 
-            border-radius:18px;
+            border-radius:22px;
 
-            padding:20px;
+            overflow:hidden;
 
-            box-shadow:
-                0 5px 20px rgba(0,0,0,0.05);
+            border:1px solid var(--border);
 
-            border:1px solid #eee;
+            box-shadow:var(--shadow);
         }
 
-        .card h2{
+        .image-header{
 
-            margin-bottom:20px;
+            padding:16px 20px;
 
-            color:#1f6d36;
+            font-weight:700;
+
+            color:var(--primary-dark);
+
+            border-bottom:1px solid var(--border);
         }
 
         .image-box{
 
-            width:100%;
-
-            min-height:350px;
-
-            background:#f7f7f7;
-
-            border-radius:15px;
-
-            overflow:hidden;
+            height:420px;
 
             display:flex;
 
+            align-items:center;
+
             justify-content:center;
 
-            align-items:center;
+            background:#f9fafb;
         }
 
         .image-box img{
 
             width:100%;
+            height:100%;
 
             object-fit:contain;
         }
 
-        .stats-grid{
+        .dashboard{
 
             display:grid;
 
             grid-template-columns:
                 repeat(auto-fit,minmax(220px,1fr));
 
-            gap:15px;
+            gap:18px;
+
+            margin-top:25px;
         }
 
         .stat{
 
-            background:#f8faf9;
+            background:white;
 
-            border-radius:14px;
+            border-radius:22px;
 
-            padding:18px;
+            padding:24px;
 
-            border:1px solid #e3e3e3;
+            border:1px solid var(--border);
+
+            box-shadow:var(--shadow);
         }
 
-        .stat-title{
+        .stat small{
 
-            color:#666;
+            display:block;
+
+            color:var(--muted);
+
+            margin-bottom:10px;
 
             font-size:14px;
-
-            margin-bottom:8px;
         }
 
-        .stat-value{
+        .stat strong{
 
-            font-size:22px;
+            font-size:34px;
 
-            font-weight:bold;
-
-            color:#1f6d36;
+            color:var(--primary-dark);
         }
 
-        .tomatoes{
+        .tomatoes-grid{
 
-            margin-top:30px;
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:20px;
         }
 
         .tomato-card{
 
-            background:#fafafa;
+            background:white;
 
-            border-radius:15px;
+            border-radius:22px;
 
-            padding:20px;
+            padding:22px;
 
-            margin-top:15px;
+            border:1px solid var(--border);
 
-            border:1px solid #e7e7e7;
+            box-shadow:var(--shadow);
+
+            transition:0.25s;
         }
 
-        .tomato-card h3{
+        .tomato-card:hover{
 
-            color:#c62828;
+            transform:translateY(-3px);
+        }
+
+        .tomato-top{
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            margin-bottom:18px;
+        }
+
+        .tomato-id{
+
+            font-size:22px;
+
+            font-weight:800;
+
+            color:var(--secondary);
+        }
+
+        .confidence{
+
+            background:#dcfce7;
+
+            color:#166534;
+
+            padding:8px 14px;
+
+            border-radius:999px;
+
+            font-size:13px;
+
+            font-weight:700;
+        }
+
+        .growth{
+
+            margin-bottom:16px;
+
+            padding:14px;
+
+            border-radius:16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #dcfce7,
+                    #bbf7d0
+                );
+
+            border:1px solid #86efac;
+        }
+
+        .growth h4{
 
             margin-bottom:10px;
+
+            color:#166534;
+        }
+
+        .growth p{
+
+            margin-bottom:6px;
+
+            font-size:14px;
+        }
+
+        .info-grid{
+
+            display:grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:12px;
+
+            margin-top:15px;
+        }
+
+        .info{
+
+            background:#f9fafb;
+
+            border-radius:14px;
+
+            padding:14px;
+        }
+
+        .info span{
+
+            display:block;
+
+            font-size:13px;
+
+            color:var(--muted);
+
+            margin-bottom:6px;
+        }
+
+        .info strong{
+
+            font-size:18px;
+        }
+
+        .real-measurements{
+
+            margin-top:18px;
+
+            padding:18px;
+
+            border-radius:18px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #eff6ff,
+                    #dbeafe
+                );
+
+            border:1px solid #bfdbfe;
+        }
+
+        .real-measurements h4{
+
+            color:#1d4ed8;
+
+            margin-bottom:14px;
         }
 
         .badge{
 
-            display:inline-block;
+            display:inline-flex;
 
-            background:#1e8e3e;
+            margin-top:18px;
 
-            color:white;
+            padding:10px 16px;
 
-            padding:6px 12px;
+            border-radius:999px;
 
-            border-radius:30px;
+            background:#dcfce7;
+
+            color:#166534;
 
             font-size:13px;
 
-            margin-top:8px;
-        }
-
-        .measure{
-
-            color:#0b5394;
-
-            font-weight:bold;
-
-            margin-top:8px;
+            font-weight:700;
         }
 
         .json-container{
 
-            margin-top:30px;
+            margin-top:20px;
 
-            background:#0d1117;
+            background:#0f172a;
 
-            color:#00ff90;
+            border-radius:22px;
 
-            border-radius:15px;
-
-            padding:20px;
+            padding:25px;
 
             overflow:auto;
 
-            max-height:600px;
-
-            font-size:14px;
-
-            line-height:1.6;
+            max-height:650px;
         }
 
         .json-container pre{
 
-            white-space:pre-wrap;
+            color:#22c55e;
 
-            word-wrap:break-word;
+            line-height:1.7;
+
+            font-size:14px;
+
+            white-space:pre-wrap;
         }
 
-        @media(max-width:900px){
+        @media(max-width:1200px){
 
-            .main-grid{
+            .top-grid{
+
+                grid-template-columns:1fr;
+            }
+
+            .preview-grid{
+
+                grid-template-columns:1fr;
+            }
+        }
+
+        @media(max-width:768px){
+
+            body{
+
+                padding:15px;
+            }
+
+            .hero h1{
+
+                font-size:38px;
+            }
+
+            .info-grid{
 
                 grid-template-columns:1fr;
             }
@@ -346,158 +643,217 @@
 
 <div class="container">
 
-    <div class="title">
+    <section class="hero">
 
-        <h1>🍅 Tomato AI</h1>
+        <h1>🍅 Tomato AI Vision</h1>
 
         <p>
-            Detección, segmentación,
-            clasificación y medición
-            inteligente de tomates cherry
+
+            Plataforma inteligente para detección,
+            segmentación y análisis de tomates cherry
+            usando YOLOv8 + visión computacional.
+
         </p>
 
-    </div>
+    </section>
 
-    <div class="upload-section">
+    <div class="top-grid">
 
-        <input
-            type="file"
-            id="fileInput"
-            accept="image/*"
-        >
-
-        <br>
-
-        <button onclick="sendImage()">
-            Analizar Imagen
-        </button>
-
-        <div
-            id="loading"
-            class="loading">
-        </div>
-
-        <div
-            id="error"
-            class="error">
-        </div>
-
-    </div>
-
-    <div class="main-grid">
+        <!-- UPLOAD -->
 
         <div class="card">
 
-            <h2>📷 Imagen Original</h2>
+            <div class="card-title">
 
-            <div class="image-box">
+                <h2>📤 Analizar Imagen</h2>
 
-                <img id="originalImage">
+            </div>
+
+            <div class="upload-box">
+
+                <div class="upload-icon">
+                    📸
+                </div>
+
+                <h3>
+                    Subir Imagen
+                </h3>
+
+                <p>
+
+                    Usa una imagen clara con tomates
+                    cherry y carta de referencia.
+
+                </p>
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept="image/*"
+                >
+
+                <button onclick="sendImage()">
+
+                    🚀 Ejecutar IA
+
+                </button>
+
+                <div
+                    id="loading"
+                    class="loading"
+                ></div>
+
+                <div
+                    id="error"
+                    class="error"
+                ></div>
 
             </div>
 
         </div>
 
-        <div class="card">
+        <!-- IMAGES -->
 
-            <h2>🧠 Resultado IA</h2>
+        <div class="preview-grid">
 
-            <div class="image-box">
+            <div class="image-card">
 
-                <img id="annotatedImage">
+                <div class="image-header">
+
+                    📷 Imagen Original
+
+                </div>
+
+                <div class="image-box">
+
+                    <img id="originalImage">
+
+                </div>
+
+            </div>
+
+            <div class="image-card">
+
+                <div class="image-header">
+
+                    🧠 Resultado IA
+
+                </div>
+
+                <div class="image-box">
+
+                    <img id="annotatedImage">
+
+                </div>
 
             </div>
 
         </div>
 
     </div>
+
+    <!-- DASHBOARD -->
+
+    <div class="dashboard">
+
+        <div class="stat">
+
+            <small>
+                Total tomates
+            </small>
+
+            <strong id="totalTomates">
+                0
+            </strong>
+
+        </div>
+
+        <div class="stat">
+
+            <small>
+                Estado cultivo
+            </small>
+
+            <strong id="estado">
+                N/A
+            </strong>
+
+        </div>
+
+        <div class="stat">
+
+            <small>
+                Confianza IA
+            </small>
+
+            <strong id="confianza">
+                0%
+            </strong>
+
+        </div>
+
+        <div class="stat">
+
+            <small>
+                Días cosecha
+            </small>
+
+            <strong id="dias">
+                0
+            </strong>
+
+        </div>
+
+        <div class="stat">
+
+            <small>
+                Carta referencia
+            </small>
+
+            <strong id="cardStatus">
+                No
+            </strong>
+
+        </div>
+
+    </div>
+
+    <!-- TOMATOES -->
 
     <div
         class="card"
         style="margin-top:30px;"
     >
 
-        <h2>📊 Resultados Generales</h2>
+        <div class="card-title">
 
-        <div class="stats-grid">
-
-            <div class="stat">
-
-                <div class="stat-title">
-                    Total tomates
-                </div>
-
-                <div
-                    class="stat-value"
-                    id="totalTomates"
-                >
-                    0
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-title">
-                    Estado crecimiento
-                </div>
-
-                <div
-                    class="stat-value"
-                    id="estado"
-                >
-                    N/A
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-title">
-                    Confianza IA
-                </div>
-
-                <div
-                    class="stat-value"
-                    id="confianza"
-                >
-                    0%
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-title">
-                    Días cosecha
-                </div>
-
-                <div
-                    class="stat-value"
-                    id="dias"
-                >
-                    0
-                </div>
-
-            </div>
+            <h2>
+                🍅 Tomates Detectados
+            </h2>
 
         </div>
 
+        <div
+            id="tomatoesContainer"
+            class="tomatoes-grid"
+        ></div>
+
     </div>
 
-    <div class="card">
+    <!-- JSON -->
 
-        <h2>🍅 Tomates Detectados</h2>
+    <div
+        class="card"
+        style="margin-top:30px;"
+    >
 
-        <div id="tomatoesContainer">
+        <div class="card-title">
+
+            <h2>
+                🧾 JSON Resultado
+            </h2>
 
         </div>
-
-    </div>
-
-    <div class="card">
-
-        <h2>🧾 JSON Predicción</h2>
 
         <div class="json-container">
 
@@ -521,10 +877,11 @@ Esperando resultados...
 
             reader.readAsDataURL(file);
 
-            reader.onload = () => resolve(reader.result);
+            reader.onload =
+                () => resolve(reader.result);
 
-            reader.onerror = error => reject(error);
-
+            reader.onerror =
+                error => reject(error);
         });
     }
 
@@ -532,31 +889,15 @@ Esperando resultados...
 
         document.getElementById(
             "error"
-        ).innerText = "";
+        ).style.display = "none";
 
         document.getElementById(
             "loading"
-        ).innerText = "";
+        ).style.display = "none";
 
         document.getElementById(
             "tomatoesContainer"
         ).innerHTML = "";
-
-        document.getElementById(
-            "estado"
-        ).innerText = "N/A";
-
-        document.getElementById(
-            "confianza"
-        ).innerText = "0%";
-
-        document.getElementById(
-            "dias"
-        ).innerText = "0";
-
-        document.getElementById(
-            "totalTomates"
-        ).innerText = "0";
 
         document.getElementById(
             "jsonOutput"
@@ -582,9 +923,14 @@ Esperando resultados...
             return;
         }
 
-        document.getElementById(
-            "loading"
-        ).innerText =
+        const loading =
+            document.getElementById(
+                "loading"
+            );
+
+        loading.style.display = "block";
+
+        loading.innerText =
             "⏳ Analizando imagen...";
 
         document.getElementById(
@@ -615,66 +961,28 @@ Esperando resultados...
             const data =
                 await response.json();
 
-            document.getElementById(
-                "loading"
-            ).innerText = "";
+            loading.style.display =
+                "none";
 
             if(!data.success){
 
-                document.getElementById(
-                    "error"
-                ).innerText =
-                    data.message || data.error;
+                const error =
+                    document.getElementById(
+                        "error"
+                    );
+
+                error.style.display =
+                    "block";
+
+                error.innerText =
+                    data.message || "Error";
 
                 return;
             }
 
-            const cleanJSON = {
-
-                total_tomates:
-                    data.total_tomates,
-
-                moneda_detectada:
-                    data.moneda_detectada,
-
-                diametro_moneda_px:
-                    data.diametro_moneda_px,
-
-                etapas_detectadas:
-                    data.etapas_detectadas,
-
-                tomates:
-                    data.tomates.map(t => ({
-
-                        id:t.id,
-
-                        confianza:t.confianza,
-
-                        area_px:
-                            t.medidas?.area_px,
-
-                        diametro_px:
-                            t.medidas?.diametro_px,
-
-                        width_px:
-                            t.medidas?.width_px,
-
-                        height_px:
-                            t.medidas?.height_px,
-
-                        diametro_real_cm:
-                            t.medidas?.diametro_real_cm
-                    }))
-            };
-
-            document.getElementById(
-                "jsonOutput"
-            ).textContent =
-                JSON.stringify(
-                    cleanJSON,
-                    null,
-                    4
-                );
+            // ======================================
+            // IMAGE RESULT
+            // ======================================
 
             if(data.annotated_image){
 
@@ -685,56 +993,79 @@ Esperando resultados...
                     data.annotated_image;
             }
 
+            // ======================================
+            // DASHBOARD
+            // ======================================
+
             document.getElementById(
                 "totalTomates"
             ).innerText =
                 data.total_tomates || 0;
 
+            document.getElementById(
+                "cardStatus"
+            ).innerText =
+                data.carta_detectada
+                ? "Sí"
+                : "No";
+
+            // ======================================
+            // GROWTH GLOBAL
+            // ======================================
+
             if(
-                data.etapas_detectadas &&
-                data.etapas_detectadas.length > 0
+                data.tomates &&
+                data.tomates.length > 0
             ){
 
-                const etapa =
-                    data.etapas_detectadas[0];
+                const growth =
+                    data.tomates[0]
+                    .etapa_crecimiento;
 
-                document.getElementById(
-                    "estado"
-                ).innerText =
-                    etapa.estado;
+                if(growth){
 
-                document.getElementById(
-                    "confianza"
-                ).innerText =
-                    (
-                        etapa.confianza * 100
-                    ).toFixed(1) + "%";
+                    document.getElementById(
+                        "estado"
+                    ).innerText =
+                        growth.estado || "N/A";
 
-                document.getElementById(
-                    "dias"
-                ).innerText =
-                    etapa.dias_cosecha;
+                    document.getElementById(
+                        "confianza"
+                    ).innerText =
+                        (
+                            (growth.confianza || 0)
+                            * 100
+                        ).toFixed(1) + "%";
+
+                    document.getElementById(
+                        "dias"
+                    ).innerText =
+                        growth.dias_cosecha || 0;
+                }
             }
 
-            let monedaTexto =
-                "No detectada";
-
-            if(data.moneda_detectada){
-
-                monedaTexto =
-                    "Detectada";
-            }
+            // ======================================
+            // TOMATOES
+            // ======================================
 
             const container =
                 document.getElementById(
                     "tomatoesContainer"
                 );
 
-            data.tomates.forEach(
-                tomato => {
+            data.tomates.forEach(tomato => {
 
                 const medidas =
                     tomato.medidas || {};
+
+                const reales =
+                    tomato.medidas_reales || {};
+
+                const growth =
+                    tomato.etapa_crecimiento || {};
+
+                const classify =
+                    tomato.clasificacion || {};
 
                 const card =
                     document.createElement(
@@ -746,99 +1077,246 @@ Esperando resultados...
 
                 card.innerHTML = `
 
-                    <h3>
-                        Tomate #${tomato.id}
-                    </h3>
+                    <div class="tomato-top">
 
-                    <p>
-                        <strong>
-                            Confianza:
-                        </strong>
+                        <div class="tomato-id">
 
-                        ${tomato.confianza}
-                    </p>
+                            🍅 Tomate #${tomato.id}
 
-                    <p>
-                        <strong>
-                            Área:
-                        </strong>
+                        </div>
 
-                        ${medidas.area_px || 0} px²
-                    </p>
+                        <div class="confidence">
 
-                    <p>
-                        <strong>
-                            Diámetro:
-                        </strong>
+                            ${(tomato.confianza * 100).toFixed(1)}%
 
-                        ${medidas.diametro_px || 0} px
-                    </p>
+                        </div>
 
-                    <p>
-                        <strong>
-                            Ancho:
-                        </strong>
-
-                        ${medidas.width_px || 0} px
-                    </p>
-
-                    <p>
-                        <strong>
-                            Alto:
-                        </strong>
-
-                        ${medidas.height_px || 0} px
-                    </p>
-
-                    <hr style="margin:15px 0;">
-
-                    <div class="measure">
-                        📏 Medidas Reales
                     </div>
 
-                    <p>
-                        <strong>
-                            Moneda referencia:
-                        </strong>
+                    <div class="growth">
 
-                        ${monedaTexto}
-                    </p>
+                        <h4>
+                            🌱 Estado de crecimiento
+                        </h4>
 
-                    <p>
-                        <strong>
-                            Diámetro real:
-                        </strong>
+                        <p>
+                            <strong>Estado:</strong>
+                            ${growth.estado || "No detectado"}
+                        </p>
 
-                        ${
-                            medidas
-                            .diametro_real_cm
-                            || 0
-                        } cm
-                    </p>
+                        <p>
+                            <strong>Confianza:</strong>
+                            ${((growth.confianza || 0) * 100).toFixed(2)}%
+                        </p>
+
+                        <p>
+                            <strong>Días cosecha:</strong>
+                            ${growth.dias_cosecha || 0}
+                        </p>
+
+                        <p>
+                            <strong>Clasificación:</strong>
+                            ${classify.clase || "N/A"}
+                        </p>
+
+                    </div>
+
+                    <div class="info-grid">
+
+                        <div class="info">
+
+                            <span>
+                                Área
+                            </span>
+
+                            <strong>
+                                ${medidas.area_px || 0} px²
+                            </strong>
+
+                        </div>
+
+                        <div class="info">
+
+                            <span>
+                                Diámetro
+                            </span>
+
+                            <strong>
+                                ${medidas.diametro_px || 0} px
+                            </strong>
+
+                        </div>
+
+                        <div class="info">
+
+                            <span>
+                                Ancho
+                            </span>
+
+                            <strong>
+                                ${medidas.width_px || 0} px
+                            </strong>
+
+                        </div>
+
+                        <div class="info">
+
+                            <span>
+                                Alto
+                            </span>
+
+                            <strong>
+                                ${medidas.height_px || 0} px
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    <div class="real-measurements">
+
+                        <h4>
+                            📏 Medidas Reales
+                        </h4>
+
+                        <div class="info-grid">
+
+                            <div class="info">
+
+                                <span>
+                                    Diámetro
+                                </span>
+
+                                <strong>
+                                    ${reales.diametro_cm ?? "N/A"} cm
+                                </strong>
+
+                            </div>
+
+                            <div class="info">
+
+                                <span>
+                                    Área
+                                </span>
+
+                                <strong>
+                                    ${reales.area_cm2 ?? "N/A"} cm²
+                                </strong>
+
+                            </div>
+
+                            <div class="info">
+
+                                <span>
+                                    Ancho
+                                </span>
+
+                                <strong>
+                                    ${reales.ancho_cm ?? "N/A"} cm
+                                </strong>
+
+                            </div>
+
+                            <div class="info">
+
+                                <span>
+                                    Alto
+                                </span>
+
+                                <strong>
+                                    ${reales.alto_cm ?? "N/A"} cm
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                     <div class="badge">
-                        Detectado correctamente
+
+                        ✅ Segmentado correctamente
+
                     </div>
+
                 `;
 
-                container.appendChild(
-                    card
-                );
-
+                container.appendChild(card);
             });
+
+            // ======================================
+            // CLEAN JSON
+            // ======================================
+
+            const cleanJson = {
+
+                success:
+                    data.success,
+
+                carta_detectada:
+                    data.carta_detectada,
+
+                clasificacion:
+                    data.clasificacion || null,
+
+                etapas_detectadas:
+                    data.etapas_detectadas || null,
+
+                referencia_carta_cm:
+                    data.referencia_carta_cm,
+
+                total_tomates:
+                    data.total_tomates,
+
+                tomates:
+                    data.tomates.map(t => ({
+
+                        id:
+                            t.id,
+
+                        confianza:
+                            t.confianza,
+
+                        clasificacion:
+                            t.clasificacion,
+
+                        etapa_crecimiento:
+                            t.etapa_crecimiento,
+
+                        medidas:
+                            t.medidas,
+
+                        medidas_reales:
+                            t.medidas_reales
+                    }))
+            };
+
+            document.getElementById(
+                "jsonOutput"
+            ).textContent =
+                JSON.stringify(
+                    cleanJson,
+                    null,
+                    4
+                );
 
         }catch(error){
 
-            document.getElementById(
-                "loading"
-            ).innerText = "";
-
-            document.getElementById(
-                "error"
-            ).innerText =
-                "Error conectando con Flask";
-
             console.error(error);
+
+            loading.style.display =
+                "none";
+
+            const errorDiv =
+                document.getElementById(
+                    "error"
+                );
+
+            errorDiv.style.display =
+                "block";
+
+            errorDiv.innerText =
+                "❌ Error conectando con Flask";
         }
     }
 

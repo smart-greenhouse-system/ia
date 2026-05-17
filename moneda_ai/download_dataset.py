@@ -76,25 +76,30 @@
 from pathlib import Path
 from roboflow import Roboflow
 
-# Carpeta del proyecto "moneda_ai"
+# Carpeta actual del proyecto
 BASE_DIR = Path(__file__).parent
 
+# Conexión con Roboflow
 rf = Roboflow(
     api_key="TQJwc8CVCEjpmYXuBbAt"
 )
 
+# Proyecto
 project = rf.workspace(
     "nandersen"
 ).project(
     "card-seg-j74w1"
 )
 
+# Versión del dataset
 version = project.version(10)
 
+# Descargar dataset YOLOv8
 dataset = version.download(
     "yolov8",
     location=str(BASE_DIR)
 )
 
+print("Dataset descargado en:")
 print(dataset.location)
 

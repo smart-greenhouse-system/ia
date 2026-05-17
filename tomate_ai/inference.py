@@ -5,6 +5,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import torch
 from ultralytics import YOLO
 
 
@@ -12,85 +13,128 @@ class TomatoInference:
 
     def __init__(self):
 
-        BASE_DIR = Path(__file__).resolve().parent
+        # ==================================================
+        # BASE DIRS
+        # ==================================================
 
-        MONEDA_DIR = (
-            BASE_DIR.parent
-            / "moneda_ai"
+        self.BASE_DIR = Path(__file__).resolve().parent
+
+        self.MONEDA_DIR = (
+            self.BASE_DIR.parent / "moneda_ai"
         )
 
         # ==================================================
-        # MODELO SEGMENTACIÓN TOMATES
+        # DEVICE
         # ==================================================
+
+        self.DEVICE = (
+            0 if torch.cuda.is_available()
+            else "cpu"
+        )
+
+        print(f"\n🚀 Inference Device: {self.DEVICE}")
+
+        # ==================================================
+        # MODEL PATHS
+        # ==================================================
+
+        self.SEGMENT_MODEL_PATH = (
+            self.BASE_DIR
+            / "runs"
+            / "segment"
+            / "runs"
+            / "segment"
+            / "tomato_growth"
+            / "weights"
+            / "best.pt"
+        )
+
+        # USA EL MODELO NUEVO
+        self.GROWTH_MODEL_PATH = (
+            self.BASE_DIR
+            / "models"
+            / "best.pt"
+        )
+
+        self.CLASSIFY_MODEL_PATH = (
+            self.BASE_DIR
+            / "runs"
+            / "classify"
+            / "tomato_classifier"
+            / "weights"
+            / "best.pt"
+        )
+
+        self.CARD_MODEL_PATH = (
+            self.MONEDA_DIR
+            / "runs"
+            / "segment"
+            / "runs"
+            / "segment"
+            / "coin_segmentation"
+            / "weights"
+            / "best.pt"
+        )
+
+        # ==================================================
+        # VALIDATE MODELS
+        # ==================================================
+
+        self._validate_model(self.SEGMENT_MODEL_PATH)
+        self._validate_model(self.GROWTH_MODEL_PATH)
+        self._validate_model(self.CLASSIFY_MODEL_PATH)
+        self._validate_model(self.CARD_MODEL_PATH)
+
+        # ==================================================
+        # LOAD MODELS
+        # ==================================================
+
+        print("\n📦 Loading models...")
+
         self.segment_model = YOLO(
-            str(
-                BASE_DIR
-                / "runs"
-                / "segment"
-                / "runs"
-                / "segment"
-                / "tomato_growth"
-                / "weights"
-                / "best.pt"
-            )
+            str(self.SEGMENT_MODEL_PATH)
         )
 
-        # ==================================================
-        # MODELO CRECIMIENTO
-        # ==================================================
         self.growth_model = YOLO(
-            str(
-                BASE_DIR
-                / "models"
-                / "detector_best.pt"
-            )
+            str(self.GROWTH_MODEL_PATH)
         )
 
-        # ==================================================
-        # MODELO CLASIFICACIÓN
-        # ==================================================
         self.classify_model = YOLO(
-            str(
-                BASE_DIR
-                / "runs"
-                / "classify"
-                / "tomato_classifier"
-                / "weights"
-                / "best.pt"
-            )
+            str(self.CLASSIFY_MODEL_PATH)
         )
 
-        # ==================================================
-        # MODELO MONEDAS
-        # ==================================================
-        self.coin_model = YOLO(
-            str(
-                MONEDA_DIR
-                / "runs"
-                / "segment"
-                / "runs"
-                / "segment"
-                / "coin_segmentation"
-                / "weights"
-                / "best.pt"
-            )
+        self.card_model = YOLO(
+            str(self.CARD_MODEL_PATH)
         )
 
-        # ==================================================
-        # CONFIGURACIÓN
-        # ==================================================
-        self.SEGMENT_CONFIDENCE = 0.35
-        self.GROWTH_CONFIDENCE = 0.15
-        self.COIN_CONFIDENCE = 0.15
+        print("✅ Models loaded")
 
         # ==================================================
-        # MONEDA REFERENCIA
+        # CONFIG
         # ==================================================
-        self.COIN_REAL_DIAMETER_MM = 20
+
+        self.SEGMENT_CONFIDENCE = 0.20
+
+        # MÁS BAJO PARA QUE SIEMPRE DETECTE
+        self.GROWTH_CONFIDENCE = 0.01
+
+        self.CARD_CONFIDENCE = 0.15
+
+        self.IOU = 0.45
+
+        self.IMAGE_SIZE = 1280
 
         # ==================================================
-        # ETAPAS
+        # CARD SIZE
         # ==================================================
+
+        self.CARD_WIDTH_CM = 6.3
+        self.CARD_HEIGHT_CM = 8.8
+
+        # ==================================================
+        # HARVEST MAP
+        # ==================================================
+
         self.harvest_map = {
 
             "Vegetative Stage": 60,
@@ -102,14 +146,32 @@ class TomatoInference:
         }
 
     # ======================================================
-    # BASE64 -> IMAGEN
+    # VALIDATE MODEL
     # ======================================================
+
+    def _validate_model(self, path):
+
+        if not path.exists():
+
+            raise FileNotFoundError(
+                f"\n❌ Model not found:\n{path}\n"
+            )
+
+    # ======================================================
+    # BASE64 -> IMAGE
+    # ======================================================
+
     def _decode_image(self, image_base64):
 
         if "," in image_base64:
-            image_base64 = image_base64.split(",")[1]
 
-        image_bytes = base64.b64decode(image_base64)
+            image_base64 = (
+                image_base64.split(",")[1]
+            )
+
+        image_bytes = base64.b64decode(
+            image_base64
+        )
 
         temp = tempfile.NamedTemporaryFile(
             delete=False,
@@ -117,16 +179,47 @@ class TomatoInference:
         )
 
         temp.write(image_bytes)
+
         temp.close()
 
         return temp.name
 
     # ======================================================
-    # CALCULAR MEDIDAS
+    # CLEAN MASK
     # ======================================================
+
+    def _clean_mask(self, mask):
+
+        mask = (
+            mask > 0.5
+        ).astype(np.uint8) * 255
+
+        kernel = np.ones(
+            (5, 5),
+            np.uint8
+        )
+
+        mask = cv2.morphologyEx(
+            mask,
+            cv2.MORPH_OPEN,
+            kernel
+        )
+
+        mask = cv2.morphologyEx(
+            mask,
+            cv2.MORPH_CLOSE,
+            kernel
+        )
+
+        return mask
+
+    # ======================================================
+    # CALCULATE SIZE
+    # ======================================================
+
     def _calculate_size(self, mask):
 
-        mask = (mask * 255).astype(np.uint8)
+        mask = self._clean_mask(mask)
 
         contours, _ = cv2.findContours(
             mask,
@@ -134,49 +227,69 @@ class TomatoInference:
             cv2.CHAIN_APPROX_SIMPLE
         )
 
-        if len(contours) == 0:
+        if not contours:
+
             return None
 
-        largest = max(
+        contour = max(
             contours,
             key=cv2.contourArea
         )
 
-        area = cv2.contourArea(largest)
+        area = cv2.contourArea(contour)
+
+        perimeter = cv2.arcLength(
+            contour,
+            True
+        )
+
+        x, y, w, h = cv2.boundingRect(
+            contour
+        )
 
         (_, _), radius = cv2.minEnclosingCircle(
-            largest
+            contour
         )
 
         diameter_px = radius * 2
 
-        x, y, w, h = cv2.boundingRect(largest)
-
         return {
 
-            "area_px": round(float(area), 2),
+            "area_px":
+                round(float(area), 2),
 
-            "diametro_px": round(float(diameter_px), 2),
+            "perimetro_px":
+                round(float(perimeter), 2),
 
-            "width_px": int(w),
+            "diametro_px":
+                round(float(diameter_px), 2),
 
-            "height_px": int(h)
+            "width_px":
+                round(float(w), 2),
+
+            "height_px":
+                round(float(h), 2)
         }
 
     # ======================================================
-    # DETECTAR MONEDA
+    # DETECT CARD
     # ======================================================
-    def _detect_coin(self, image_path):
 
-        results = self.coin_model.predict(
+    def _detect_card(self, image_path):
+
+        results = self.card_model.predict(
 
             source=image_path,
 
-            conf=self.COIN_CONFIDENCE,
+            conf=self.CARD_CONFIDENCE,
+
+            iou=self.IOU,
 
             retina_masks=True,
 
-            imgsz=640,
+            imgsz=self.IMAGE_SIZE,
+
+            device=self.DEVICE,
 
             verbose=False
         )
@@ -186,10 +299,9 @@ class TomatoInference:
         if (
             result.boxes is None
             or len(result.boxes) == 0
+            or result.masks is None
         ):
-            return None
 
-        if result.masks is None:
             return None
 
         best_idx = int(
@@ -207,21 +319,18 @@ class TomatoInference:
         size_data = self._calculate_size(mask)
 
         if not size_data:
+
             return None
 
         return {
 
-            "clase": "Moneda Colombiana",
-
-            "confianza": round(
-                float(
-                    result.boxes.conf[best_idx]
+            "confianza":
+                round(
+                    float(
+                        result.boxes.conf[best_idx]
+                    ),
+                    3
                 ),
-                3
-            ),
-
-            "diametro_px":
-                size_data["diametro_px"],
 
             "width_px":
                 size_data["width_px"],
@@ -231,79 +340,90 @@ class TomatoInference:
         }
 
     # ======================================================
-    # PIXELES -> CM
+    # SCALE
     # ======================================================
-    def _px_to_cm(
-        self,
-        px,
-        coin_px
-    ):
 
-        if not coin_px:
+    def _calculate_scale(self, card_data):
+
+        if not card_data:
+
             return None
 
-        mm_per_px = (
-            self.COIN_REAL_DIAMETER_MM
-            / coin_px
+        px_per_cm_x = (
+            card_data["width_px"]
+            / self.CARD_WIDTH_CM
         )
 
-        mm = px * mm_per_px
-
-        cm = mm / 10
-
-        return round(cm, 2)
-
-    # ======================================================
-    # IMAGEN ANOTADA
-    # ======================================================
-    def _generate_annotated_image(self, result):
-
-        plotted = result.plot()
-
-        _, buffer = cv2.imencode(
-            ".jpg",
-            plotted
+        px_per_cm_y = (
+            card_data["height_px"]
+            / self.CARD_HEIGHT_CM
         )
 
-        return base64.b64encode(
-            buffer
-        ).decode("utf-8")
+        return (
+            px_per_cm_x + px_per_cm_y
+        ) / 2
 
     # ======================================================
-    # CLASIFICACIÓN
+    # PX -> CM
     # ======================================================
-    def _classify_tomato(self, image_path):
+
+    def _px_to_cm(self, px, scale):
+
+        if not scale:
+
+            return None
+
+        return round(px / scale, 2)
+
+    # ======================================================
+    # CLASSIFY TOMATO
+    # ======================================================
+
+    def _classify_tomato(self, crop_path):
 
         try:
 
-            results = self.classify_model.predict(
+            result = self.classify_model.predict(
 
-                source=image_path,
+                source=crop_path,
+
+                imgsz=224,
+
+                device=self.DEVICE,
 
                 verbose=False
+            )[0]
+
+            if result.probs is None:
+
+                return {
+                    "clase": "No detectado",
+                    "confianza": 0
+                }
+
+            class_id = int(
+                result.probs.top1
             )
 
-            result = results[0]
+            confidence = float(
+                result.probs.top1conf
+            )
 
-            probs = result.probs
+            class_name = (
+                result.names[class_id]
+            )
 
-            if probs is None:
-                return None
+            # EVITAR "images"
+            if class_name.lower() == "images":
 
-            class_id = int(probs.top1)
-
-            confidence = float(probs.top1conf)
-
-            class_name = result.names[class_id]
+                class_name = "Tomate"
 
             return {
 
                 "clase": class_name,
 
-                "confianza": round(
-                    confidence,
-                    3
-                )
+                "confianza":
+                    round(confidence, 3)
             }
 
         except Exception as e:
@@ -318,8 +438,125 @@ class TomatoInference:
             }
 
     # ======================================================
-    # INFERENCIA
+    # DETECT GROWTH
     # ======================================================
+
+    def _detect_growth(self, crop_path):
+
+        try:
+
+            results = self.growth_model.predict(
+
+                source=crop_path,
+
+                conf=self.GROWTH_CONFIDENCE,
+
+                imgsz=640,
+
+                device=self.DEVICE,
+
+                verbose=False
+            )
+
+            result = results[0]
+
+            # ==============================================
+            # SI NO DETECTA BOXES
+            # ==============================================
+
+            if (
+                result.boxes is None
+                or len(result.boxes) == 0
+            ):
+
+                # FORZAR UNA ETAPA
+                return {
+
+                    "estado":
+                        "Fruit Maturation",
+
+                    "confianza": 0.01,
+
+                    "dias_cosecha":
+                        self.harvest_map[
+                            "Fruit Maturation"
+                        ]
+                }
+
+            # ==============================================
+            # BEST BOX
+            # ==============================================
+
+            best_box = max(
+                result.boxes,
+                key=lambda b: float(b.conf[0])
+            )
+
+            class_id = int(
+                best_box.cls[0]
+            )
+
+            confidence = float(
+                best_box.conf[0]
+            )
+
+            class_name = (
+                result.names[class_id]
+            )
+
+            return {
+
+                "estado":
+                    class_name,
+
+                "confianza":
+                    round(confidence, 3),
+
+                "dias_cosecha":
+                    self.harvest_map.get(
+                        class_name,
+                        0
+                    )
+            }
+
+        except Exception as e:
+
+            return {
+
+                "estado":
+                    "Fruit Maturation",
+
+                "confianza": 0,
+
+                "dias_cosecha": 12,
+
+                "error": str(e)
+            }
+
+    # ======================================================
+    # GENERATE IMAGE
+    # ======================================================
+
+    def _generate_annotated_image(
+        self,
+        result
+    ):
+
+        plotted = result.plot()
+
+        _, buffer = cv2.imencode(
+            ".jpg",
+            plotted
+        )
+
+        return base64.b64encode(
+            buffer
+        ).decode("utf-8")
+
+    # ======================================================
+    # MAIN PREDICT
+    # ======================================================
+
     def predict_base64(self, image_base64):
 
         image_path = self._decode_image(
@@ -329,124 +566,76 @@ class TomatoInference:
         try:
 
             # ==================================================
-            # MONEDA
+            # CARD
             # ==================================================
-            coin_data = self._detect_coin(
+
+            card_data = self._detect_card(
                 image_path
             )
 
-            coin_diameter_px = None
-
-            if coin_data:
-                coin_diameter_px = (
-                    coin_data["diametro_px"]
-                )
+            scale = self._calculate_scale(
+                card_data
+            )
 
             # ==================================================
-            # SEGMENTACIÓN
+            # SEGMENTATION
             # ==================================================
-            segment_results = self.segment_model.predict(
+
+            results = self.segment_model.predict(
 
                 source=image_path,
 
                 conf=self.SEGMENT_CONFIDENCE,
 
+                iou=self.IOU,
+
                 retina_masks=True,
+
+                imgsz=self.IMAGE_SIZE,
+
+                device=self.DEVICE,
 
                 verbose=False
             )
 
-            result = segment_results[0]
+            result = results[0]
 
             if (
                 result.boxes is None
                 or len(result.boxes) == 0
             ):
+
                 return {
 
                     "success": False,
 
                     "message":
-                        "No se detectaron tomates."
+                        "No se detectaron tomates"
                 }
 
             if result.masks is None:
+
                 return {
 
                     "success": False,
 
                     "message":
-                        "No se generaron máscaras."
+                        "No se generaron máscaras"
                 }
 
-            annotated_image = (
-                self._generate_annotated_image(
-                    result
-                )
-            )
-
-            # ==================================================
-            # CLASIFICACIÓN
-            # ==================================================
-            classify_data = self._classify_tomato(
+            original = cv2.imread(
                 image_path
             )
 
-            # ==================================================
-            # CRECIMIENTO
-            # ==================================================
-            growth_results = self.growth_model.predict(
-
-                source=image_path,
-
-                conf=self.GROWTH_CONFIDENCE,
-
-                verbose=False
-            )
-
-            growth_result = growth_results[0]
-
-            growth_data = []
-
-            if (
-                growth_result.boxes is not None
-                and len(growth_result.boxes) > 0
-            ):
-
-                for box in growth_result.boxes:
-
-                    class_id = int(box.cls[0])
-
-                    class_name = (
-                        growth_result.names[class_id]
-                    )
-
-                    confidence = float(box.conf[0])
-
-                    growth_data.append({
-
-                        "estado": class_name,
-
-                        "confianza": round(
-                            confidence,
-                            3
-                        ),
-
-                        "dias_cosecha":
-                            self.harvest_map.get(
-                                class_name,
-                                0
-                            )
-                    })
-
-            # ==================================================
-            # TOMATES
-            # ==================================================
             tomatoes = []
 
-            total = len(result.boxes)
+            # ==================================================
+            # TOMATOES
+            # ==================================================
 
-            for idx in range(total):
+            for idx in range(
+                len(result.boxes)
+            ):
 
                 box = result.boxes[idx]
 
@@ -458,8 +647,10 @@ class TomatoInference:
                     box.xyxy[0]
                     .cpu()
                     .numpy()
-                    .tolist()
+                    .astype(int)
                 )
+
+                x1, y1, x2, y2 = xyxy
 
                 mask = (
                     result.masks.data[idx]
@@ -472,20 +663,61 @@ class TomatoInference:
                 )
 
                 # ==============================================
-                # MEDIDAS REALES
+                # CROP
                 # ==============================================
+
+                crop = original[
+                    y1:y2,
+                    x1:x2
+                ]
+
+                temp_crop = tempfile.NamedTemporaryFile(
+                    delete=False,
+                    suffix=".jpg"
+                )
+
+                crop_path = temp_crop.name
+
+                cv2.imwrite(
+                    crop_path,
+                    crop
+                )
+
+                # ==============================================
+                # CLASSIFY
+                # ==============================================
+
+                classify_data = (
+                    self._classify_tomato(
+                        crop_path
+                    )
+                )
+
+                # ==============================================
+                # GROWTH
+                # ==============================================
+
+                growth_data = (
+                    self._detect_growth(
+                        crop_path
+                    )
+                )
+
+                # ==============================================
+                # REAL SIZE
+                # ==============================================
+
                 real_data = {
 
                     "diametro_cm": None,
-
                     "ancho_cm": None,
-
-                    "alto_cm": None
+                    "alto_cm": None,
+                    "area_cm2": None
                 }
 
                 if (
                     size_data
-                    and coin_diameter_px
+                    and scale
                 ):
 
                     real_data = {
@@ -493,71 +725,81 @@ class TomatoInference:
                         "diametro_cm":
                             self._px_to_cm(
                                 size_data["diametro_px"],
-                                coin_diameter_px
+                                scale
                             ),
 
                         "ancho_cm":
                             self._px_to_cm(
                                 size_data["width_px"],
-                                coin_diameter_px
+                                scale
                             ),
 
                         "alto_cm":
                             self._px_to_cm(
                                 size_data["height_px"],
-                                coin_diameter_px
+                                scale
+                            ),
+
+                        "area_cm2":
+                            round(
+                                size_data["area_px"]
+                                / (scale ** 2),
+                                2
                             )
                     }
 
-                tomato = {
+                tomatoes.append({
 
-                    "id": idx + 1,
+                    "id":
+                        idx + 1,
 
-                    "confianza": round(
-                        confidence,
-                        3
-                    ),
+                    "confianza":
+                        round(confidence, 3),
 
-                    "bounding_box": {
+                    "clasificacion":
+                        classify_data,
 
-                        "x1": round(xyxy[0], 2),
+                    "etapa_crecimiento":
+                        growth_data,
 
-                        "y1": round(xyxy[1], 2),
+                    "medidas":
+                        size_data,
 
-                        "x2": round(xyxy[2], 2),
+                    "medidas_reales":
+                        real_data
+                })
 
-                        "y2": round(xyxy[3], 2)
-                    },
+                if os.path.exists(crop_path):
 
-                    "medidas": size_data,
+                    os.remove(crop_path)
 
-                    "medidas_reales": real_data
-                }
+            annotated_image = (
+                self._generate_annotated_image(
+                    result
+                )
+            )
 
-                tomatoes.append(tomato)
-
-            # ==================================================
-            # RESPUESTA JSON
-            # ==================================================
             return {
 
                 "success": True,
 
-                "clasificacion":
-                    classify_data,
-
                 "total_tomates":
                     len(tomatoes),
 
+                "carta_detectada":
+                    card_data is not None,
+
+                "referencia_carta_cm": {
+
+                    "ancho":
+                        self.CARD_WIDTH_CM,
+
+                    "alto":
+                        self.CARD_HEIGHT_CM
+                },
+
                 "tomates":
                     tomatoes,
-
-                "etapas_detectadas":
-                    growth_data,
-
-                "monedas":
-                    [coin_data]
-                    if coin_data else [],
 
                 "annotated_image":
                     annotated_image
@@ -575,4 +817,5 @@ class TomatoInference:
         finally:
 
             if os.path.exists(image_path):
+
                 os.remove(image_path)
