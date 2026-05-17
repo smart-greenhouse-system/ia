@@ -81,7 +81,7 @@ BASE_DIR = Path(__file__).parent
 
 # Conexión con Roboflow
 rf = Roboflow(
-    api_key="TQJwc8CVCEjpmYXuBbAt"
+    api_key="API_KEY"
 )
 
 # Proyecto
