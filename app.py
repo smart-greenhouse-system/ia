@@ -22,6 +22,9 @@ from flask import Flask, request, jsonify
 from services.crop_identifier import CropIdentifier
 from services.sensor_manager import SensorManager
 
+# Importar blueprints de modelos predictivos
+from routes.riego_routes import riego_bp
+
 
 def create_app():
     """
@@ -34,6 +37,9 @@ def create_app():
     # Inicializar servicios
     crop_id = CropIdentifier()
     sensor_mgr = SensorManager()
+
+    # Registrar blueprints
+    app.register_blueprint(riego_bp, url_prefix='/riego')
     
     # ======================================================================
     # ENDPOINT PRINCIPAL ÚNICO - Puerta de entrada
@@ -48,7 +54,11 @@ def create_app():
             "mensaje": "API de Análisis de Cultivos - Endpoint Único",
             "version": "2.0",
             "arquitectura": "Análisis centralizado con identificación automática de cultivo",
-            "endpoint_principal": "/predict",
+            "endpoints_disponibles": {
+                "GET /": "Esta información",
+                "POST /predict": "Identificación de cultivo + sensores",
+                "POST /riego/predict": "Predicción de tiempo de vaciado de tanque"
+            },
             "campos_requeridos": [
                 "image (base64)",
                 "temperatura (float)",
