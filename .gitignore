@@ -4,3 +4,4 @@ image/
 models/*.pt
 venv/
 venv/*
+info_project/
