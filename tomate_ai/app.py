@@ -1,14 +1,30 @@
+import traceback
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import (
+    Flask,
+    jsonify,
+    request,
+    send_from_directory
+)
+
+from flask_cors import CORS
 
 from inference import TomatoInference
 
+
 # =========================================================
-# CONFIGURACIÓN
+# BASE DIR
 # =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent
+
+print(f"\n📁 BASE_DIR:\n{BASE_DIR}")
+
+
+# =========================================================
+# FLASK CONFIG
+# =========================================================
 
 app = Flask(
     __name__,
@@ -16,48 +32,321 @@ app = Flask(
     template_folder="templates"
 )
 
+CORS(
+    app,
+    resources={
+        r"/*": {
+            "origins": "*"
+        }
+    }
+)
+
+app.config["MAX_CONTENT_LENGTH"] = (
+    25 * 1024 * 1024
+)
+
+app.config["JSON_SORT_KEYS"] = False
+
+print("\n🚀 FLASK INICIADO")
+
+
 # =========================================================
-# MODELO IA
+# LOAD AI
 # =========================================================
 
-tomato_ai = TomatoInference()
+tomato_ai = None
+
+try:
+
+    print("\n🤖 CARGANDO TOMATO AI...")
+
+    tomato_ai = TomatoInference()
+
+    print("✅ IA CARGADA")
+
+except Exception as e:
+
+    print("\n❌ ERROR CARGANDO IA")
+
+    print(e)
+
+    traceback.print_exc()
+
 
 # =========================================================
-# REFERENCIA CARTA
-# =========================================================
-"""
-Tamaño real carta:
-6.3 x 8.8 cm
-"""
-
-CARD_WIDTH_CM = 6.3
-CARD_HEIGHT_CM = 8.8
-
-# =========================================================
-# HOME
+# HELPERS
 # =========================================================
 
-@app.route("/")
+def json_success(data, status=200):
+
+    return jsonify(data), status
+
+
+def json_error(message, status=400):
+
+    print(f"\n❌ JSON ERROR: {message}")
+
+    return jsonify({
+
+        "success": False,
+
+        "message": str(message)
+
+    }), status
+
+
+# =========================================================
+# ROOT
+# =========================================================
+
+@app.route("/", methods=["GET"])
 def home():
 
-    return send_from_directory(
-        "templates",
-        "index.html"
-    )
+    try:
+
+        print("\n🏠 HOME")
+
+        index_path = (
+            BASE_DIR /
+            "templates" /
+            "index.html"
+        )
+
+        if not index_path.exists():
+
+            print(
+                f"❌ index.html NO EXISTE:\n"
+                f"{index_path}"
+            )
+
+            return json_error(
+                "index.html no encontrado",
+                404
+            )
+
+        print("✅ FRONTEND OK")
+
+        return send_from_directory(
+            app.template_folder,
+            "index.html"
+        )
+
+    except Exception as e:
+
+        print("\n❌ HOME ERROR")
+
+        print(e)
+
+        traceback.print_exc()
+
+        return json_error(
+            "Error cargando frontend",
+            500
+        )
+
 
 # =========================================================
 # HEALTH
 # =========================================================
 
-@app.route("/health")
+@app.route("/health", methods=["GET"])
 def health():
 
-    return jsonify({
+    try:
 
-        "success": True,
+        print("\n💚 HEALTH CHECK")
 
-        "message": "Tomato AI funcionando"
-    })
+        ai_loaded = (
+            tomato_ai is not None
+        )
+
+        response = {
+
+            "success":
+                True,
+
+            "status":
+                "online",
+
+            "ai_loaded":
+                ai_loaded,
+
+            "device":
+                (
+                    str(tomato_ai.DEVICE)
+                    if ai_loaded
+                    else None
+                ),
+
+            "segment_model":
+                (
+                    str(
+                        tomato_ai
+                        .SEGMENT_MODEL_PATH
+                        .name
+                    )
+                    if ai_loaded
+                    else None
+                ),
+
+            "growth_model":
+                (
+                    str(
+                        tomato_ai
+                        .GROWTH_MODEL_PATH
+                        .name
+                    )
+                    if ai_loaded
+                    else None
+                ),
+
+            "homography":
+                True,
+
+            "real_measurements":
+                True,
+
+            "pixels_per_cm":
+                (
+                    tomato_ai.PIXELS_PER_CM
+                    if ai_loaded
+                    else None
+                )
+        }
+
+        print("✅ HEALTH OK")
+
+        return json_success(response)
+
+    except Exception as e:
+
+        print("\n❌ HEALTH ERROR")
+
+        print(e)
+
+        traceback.print_exc()
+
+        return json_error(
+            "Health check failed",
+            500
+        )
+
+
+# =========================================================
+# API INFO
+# =========================================================
+
+@app.route("/api/info", methods=["GET"])
+def api_info():
+
+    try:
+
+        print("\n📘 API INFO")
+
+        if tomato_ai is None:
+
+            return json_error(
+                "IA no disponible",
+                500
+            )
+
+        response = {
+
+            "success": True,
+
+            "project":
+                "Tomato AI Vision",
+
+            "version":
+                "4.0",
+
+            "device":
+                tomato_ai.DEVICE,
+
+            "segmentation_model":
+                str(
+                    tomato_ai
+                    .SEGMENT_MODEL_PATH
+                ),
+
+            "growth_model":
+                str(
+                    tomato_ai
+                    .GROWTH_MODEL_PATH
+                ),
+
+            "segment_classes":
+                tomato_ai
+                .segment_model
+                .names,
+
+            "growth_classes":
+                tomato_ai
+                .growth_model
+                .names,
+
+            "card_reference": {
+
+                "width_cm":
+                    tomato_ai
+                    .CARD_WIDTH_CM,
+
+                "height_cm":
+                    tomato_ai
+                    .CARD_HEIGHT_CM
+            },
+
+            "homography": {
+
+                "enabled":
+                    True,
+
+                "pixels_per_cm":
+                    tomato_ai
+                    .PIXELS_PER_CM,
+
+                "warp_width":
+                    tomato_ai
+                    .WARP_WIDTH,
+
+                "warp_height":
+                    tomato_ai
+                    .WARP_HEIGHT
+            },
+
+            "real_measurements": {
+
+                "area":
+                    "cm2",
+
+                "diameter":
+                    "cm",
+
+                "perimeter":
+                    "cm"
+            },
+
+            "harvest_days":
+                tomato_ai.harvest_map
+        }
+
+        print("✅ API INFO OK")
+
+        return json_success(response)
+
+    except Exception as e:
+
+        print("\n❌ API INFO ERROR")
+
+        print(e)
+
+        traceback.print_exc()
+
+        return json_error(
+            "Error obteniendo información",
+            500
+        )
+
 
 # =========================================================
 # PREDICT
@@ -68,236 +357,319 @@ def predict():
 
     try:
 
-        data = request.get_json()
+        print(
+            "\n"
+            "=================================================="
+        )
+
+        print("📩 NUEVA REQUEST /predict")
+
+        print(
+            "=================================================="
+        )
+
+        # =====================================================
+        # IA VALIDATION
+        # =====================================================
+
+        if tomato_ai is None:
+
+            return json_error(
+                "La IA no fue cargada",
+                500
+            )
+
+        # =====================================================
+        # JSON VALIDATION
+        # =====================================================
+
+        data = request.get_json(
+            force=False,
+            silent=True
+        )
 
         if not data:
 
-            return jsonify({
+            print("❌ JSON VACÍO")
 
-                "success": False,
-
-                "message": "No se recibió JSON"
-
-            }), 400
+            return json_error(
+                "JSON inválido"
+            )
 
         image_base64 = data.get("image")
 
         if not image_base64:
 
-            return jsonify({
+            print("❌ IMAGE VACÍA")
 
-                "success": False,
+            return json_error(
+                "Imagen requerida"
+            )
 
-                "message": "No se recibió imagen"
+        print("✅ JSON OK")
 
-            }), 400
-
-        # ==================================================
-        # INFERENCIA
-        # ==================================================
-
-        result = tomato_ai.predict_base64(
-            image_base64
+        print(
+            f"📦 SIZE BASE64: "
+            f"{len(image_base64)}"
         )
+
+        # =====================================================
+        # INFERENCE
+        # =====================================================
+
+        print("\n🧠 EJECUTANDO INFERENCIA...")
+
+        result = (
+            tomato_ai.predict_base64(
+                image_base64
+            )
+        )
+
+        print("\n📊 RESULTADO IA")
+
+        print(result.keys())
+
+        # =====================================================
+        # RESULT VALIDATION
+        # =====================================================
+
+        if not isinstance(result, dict):
+
+            return json_error(
+                "Resultado inválido",
+                500
+            )
 
         if not result.get("success"):
 
-            return jsonify(result), 400
+            print("\n❌ ERROR INFERENCIA")
 
-        # ==================================================
-        # DETECTAR CARTA
-        # ==================================================
+            print(result)
 
-        cards = result.get(
-            "monedas",
+            return json_error(
+
+                result.get(
+                    "message",
+                    "Error inferencia"
+                ),
+
+                500
+            )
+
+        # =====================================================
+        # DEBUG RESPONSE
+        # =====================================================
+
+        total = result.get(
+            "total_tomates",
+            0
+        )
+
+        carta = result.get(
+            "carta_detectada",
+            False
+        )
+
+        pixels_per_cm = result.get(
+            "pixels_per_cm"
+        )
+
+        print("\n🍅 RESULTADOS")
+
+        print(
+            f"🍅 TOTAL TOMATES: "
+            f"{total}"
+        )
+
+        print(
+            f"🪪 CARTA DETECTADA: "
+            f"{carta}"
+        )
+
+        print(
+            f"📏 PIXELS/CM: "
+            f"{pixels_per_cm}"
+        )
+
+        # =====================================================
+        # PER TOMATO DEBUG
+        # =====================================================
+
+        tomatoes = result.get(
+            "tomates",
             []
         )
 
-        card_detected = False
+        for tomato in tomatoes:
 
-        px_per_cm_x = None
-        px_per_cm_y = None
-
-        if len(cards) > 0:
-
-            card = cards[0]
-
-            width_px = card.get(
-                "width_px"
+            print(
+                "\n----------------------------"
             )
 
-            height_px = card.get(
-                "height_px"
+            print(
+                f"🍅 TOMATE ID: "
+                f"{tomato.get('id')}"
             )
 
-            if width_px and height_px:
+            print(
+                f"🌱 ESTADO: "
+                f"{tomato.get('estado')}"
+            )
 
-                px_per_cm_x = (
-                    width_px
-                    / CARD_WIDTH_CM
-                )
-
-                px_per_cm_y = (
-                    height_px
-                    / CARD_HEIGHT_CM
-                )
-
-                card_detected = True
-
-        # ==================================================
-        # TOMATES
-        # ==================================================
-
-        processed_tomatoes = []
-
-        for tomato in result.get(
-            "tomates",
-            []
-        ):
+            print(
+                f"📅 DÍAS COSECHA: "
+                f"{tomato.get('dias_cosecha')}"
+            )
 
             medidas = tomato.get(
-                "medidas",
+                "medidas_reales",
                 {}
             )
 
-            area_px = medidas.get(
-                "area_px"
+            print(
+                f"📐 ÁREA: "
+                f"{medidas.get('area_cm2')} cm2"
             )
 
-            width_px = medidas.get(
-                "width_px"
+            print(
+                f"📏 DIÁMETRO: "
+                f"{medidas.get('diametro_cm')} cm"
             )
 
-            height_px = medidas.get(
-                "height_px"
+            print(
+                f"📎 PERÍMETRO: "
+                f"{medidas.get('perimetro_cm')} cm"
             )
 
-            diameter_px = medidas.get(
-                "diametro_px"
-            )
+        print(
+            "\n✅ REQUEST COMPLETADA"
+        )
 
-            real_data = {
-
-                "area_cm2": None,
-
-                "ancho_cm": None,
-
-                "alto_cm": None,
-
-                "diametro_cm": None
-            }
-
-            # ==============================================
-            # CONVERSIÓN REAL
-            # ==============================================
-
-            if (
-                card_detected
-                and px_per_cm_x
-                and px_per_cm_y
-            ):
-
-                real_width = round(
-                    width_px / px_per_cm_x,
-                    2
-                )
-
-                real_height = round(
-                    height_px / px_per_cm_y,
-                    2
-                )
-
-                avg_px_cm = (
-                    px_per_cm_x
-                    + px_per_cm_y
-                ) / 2
-
-                real_diameter = round(
-                    diameter_px
-                    / avg_px_cm,
-                    2
-                )
-
-                area_cm2 = round(
-                    area_px
-                    / (
-                        avg_px_cm ** 2
-                    ),
-                    2
-                )
-
-                real_data = {
-
-                    "area_cm2":
-                        area_cm2,
-
-                    "ancho_cm":
-                        real_width,
-
-                    "alto_cm":
-                        real_height,
-
-                    "diametro_cm":
-                        real_diameter
-                }
-
-            tomato["medidas_reales"] = (
-                real_data
-            )
-
-            processed_tomatoes.append(
-                tomato
-            )
-
-        # ==================================================
-        # RESPUESTA
-        # ==================================================
-
-        return jsonify({
-
-            "success": True,
-
-            "total_tomates":
-                len(processed_tomatoes),
-
-            "clasificacion":
-                result.get(
-                    "clasificacion"
-                ),
-
-            "etapas_detectadas":
-                result.get(
-                    "etapas_detectadas"
-                ),
-
-            "carta_detectada":
-                card_detected,
-
-            "referencia_carta_cm": {
-
-                "ancho": CARD_WIDTH_CM,
-
-                "alto": CARD_HEIGHT_CM
-            },
-
-            "tomates":
-                processed_tomatoes,
-
-            "annotated_image":
-                result.get(
-                    "annotated_image"
-                )
-        })
+        return json_success(result)
 
     except Exception as e:
 
-        return jsonify({
+        print(
+            "\n"
+            "=================================================="
+        )
 
-            "success": False,
+        print("❌ PREDICT ERROR")
 
-            "message": str(e)
+        print(
+            "=================================================="
+        )
 
-        }), 500
+        print(e)
+
+        traceback.print_exc()
+
+        return json_error(
+            str(e),
+            500
+        )
+
+
+# =========================================================
+# STATIC FILES
+# =========================================================
+
+@app.route(
+    "/static/<path:filename>",
+    methods=["GET"]
+)
+def static_files(filename):
+
+    try:
+
+        print(
+            f"\n📂 STATIC FILE: "
+            f"{filename}"
+        )
+
+        static_path = (
+            BASE_DIR /
+            "static" /
+            filename
+        )
+
+        if not static_path.exists():
+
+            print(
+                f"❌ STATIC NO EXISTE:\n"
+                f"{static_path}"
+            )
+
+            return json_error(
+                "Archivo no encontrado",
+                404
+            )
+
+        return send_from_directory(
+            app.static_folder,
+            filename
+        )
+
+    except Exception as e:
+
+        print("\n❌ STATIC ERROR")
+
+        print(e)
+
+        traceback.print_exc()
+
+        return json_error(
+            "Error archivo static",
+            500
+        )
+
+
+# =========================================================
+# 404
+# =========================================================
+
+@app.errorhandler(404)
+def not_found(e):
+
+    print("\n❌ 404")
+
+    return json_error(
+        "Ruta no encontrada",
+        404
+    )
+
+
+# =========================================================
+# 413
+# =========================================================
+
+@app.errorhandler(413)
+def too_large(e):
+
+    print("\n❌ ARCHIVO MUY GRANDE")
+
+    return json_error(
+        "Imagen demasiado grande",
+        413
+    )
+
+
+# =========================================================
+# 500
+# =========================================================
+
+@app.errorhandler(500)
+def internal_error(e):
+
+    print("\n❌ INTERNAL SERVER ERROR")
+
+    traceback.print_exc()
+
+    return json_error(
+        "Error interno servidor",
+        500
+    )
+
 
 # =========================================================
 # MAIN
@@ -305,11 +677,47 @@ def predict():
 
 if __name__ == "__main__":
 
+    print(
+        "\n"
+        "=================================================="
+    )
+
+    print("🔥 TOMATO AI VISION v4.0")
+
+    print(
+        "=================================================="
+    )
+
+    print("🌐 URL:")
+    print("http://0.0.0.0:5000")
+
+    print("\n🧠 IA:")
+    print("YOLO SEGMENTATION")
+    print("YOLO GROWTH CLASSIFICATION")
+
+    print("\n📐 GEOMETRÍA:")
+    print("HOMOGRAFÍA ACTIVADA")
+    print("MEDIDAS REALES EN CM²")
+
+    print("\n🍅 FEATURES:")
+    print("- Área real tomate")
+    print("- Diámetro real")
+    print("- Perímetro real")
+    print("- Corrección perspectiva")
+    print("- Días estimados cosecha")
+    print("- Segmentación rectificada")
+
+    print("\n🚀 INICIANDO FLASK...")
+
     app.run(
 
         host="0.0.0.0",
 
         port=5000,
 
-        debug=True
+        debug=True,
+
+        threaded=True,
+
+        use_reloader=False
     )

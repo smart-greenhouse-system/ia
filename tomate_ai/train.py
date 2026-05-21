@@ -141,3 +141,159 @@
 # #     BASE_DIR
 # #     / "runs/detect/tomato_state_detector/weights/best.pt"
 # # )
+
+
+# from ultralytics import YOLO
+# import torch
+# from pathlib import Path
+
+# BASE_DIR = Path(__file__).parent
+
+# DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# # =========================================================
+# # MODELO SEGMENTACIÓN
+# # =========================================================
+
+# from ultralytics import YOLO
+# import torch
+
+
+# # ======================================================
+# # DEVICE
+# # ======================================================
+
+# DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# print(f"\n🚀 DEVICE: {DEVICE}")
+
+# # ======================================================
+# # MODEL
+# # ======================================================
+
+# model = YOLO("yolo11s-seg.pt")
+
+# # ======================================================
+# # TRAIN
+# # ======================================================
+
+# model.train(
+
+#     # DATASET
+#     data="/home/pablo/Documents/Python/crecimiento/tomate_ai/tomate_segmentation-1/data.yaml",
+
+#     # TASK
+#     task="segment",
+
+#     # TRAINING
+#     epochs=150,
+#     imgsz=832,
+#     batch=4,
+
+#     # DEVICE
+#     device=DEVICE,
+
+#     # PROJECT
+#     project="runs/segment",
+#     name="tomate_model_v2",
+
+#     # OPTIMIZATION
+#     patience=30,
+#     pretrained=True,
+#     amp=True,
+
+#     # BETTER GENERALIZATION
+#     close_mosaic=15,
+
+#     # AUGMENTATION
+#     hsv_h=0.015,
+#     hsv_s=0.4,
+#     hsv_v=0.2,
+
+#     degrees=5,
+#     translate=0.05,
+#     scale=0.15,
+
+#     fliplr=0.5,
+#     flipud=0.0,
+
+#     mosaic=0.0,
+#     mixup=0.0,
+
+#     # SEGMENTATION QUALITY
+#     overlap_mask=True,
+#     mask_ratio=1,
+
+#     # SAVE
+#     save=True,
+#     save_period=10
+# )
+
+
+from ultralytics import YOLO
+import torch
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent
+
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# =========================================================
+# MODELO SEGMENTACIÓN
+# =========================================================
+
+from ultralytics import YOLO
+import torch
+
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+print("🚀 DEVICE:", DEVICE)
+
+model = YOLO("yolo11n-seg.pt")
+
+model.train(
+    data="/home/pablo/Documents/Python/crecimiento/tomate_ai/tomate_segmentation-2/data.yaml",
+
+    task="segment",
+
+    epochs=120,
+
+    imgsz=640,
+
+    batch=2,
+
+    device=DEVICE,
+
+    workers=2,
+
+    cache=False,
+
+    amp=True,
+
+    pretrained=True,
+
+    patience=25,
+
+    optimizer="AdamW",
+
+    lr0=0.001,
+
+    weight_decay=0.0005,
+
+    hsv_h=0.015,
+    hsv_s=0.4,
+    hsv_v=0.2,
+
+    degrees=5,
+    translate=0.05,
+    scale=0.10,
+
+    fliplr=0.5,
+
+    mosaic=0.0,
+    mixup=0.0,
+
+    project="runs/segment",
+
+    name="tomate_model_v2"
+)

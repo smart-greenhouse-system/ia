@@ -64,19 +64,36 @@
 
 
 # MODELO DE CLASIFICACIÓN DE TOMATE CHERRY
+# from roboflow import Roboflow
+
+
+# rf = Roboflow(api_key="API_ROBOTFLOW")
+
+
+# project = rf.workspace("cherrytomato-n6w1z").project(
+#     "cherry-tomato-classification-weatf"
+# )
+
+# version = project.version(2)
+
+# dataset = version.download("yolov8")
+
+
+# print("Dataset descargado en:", dataset.location)
+
+
+
+
 from roboflow import Roboflow
 
+rf = Roboflow(api_key="API")
 
-rf = Roboflow(api_key="API_ROBOTFLOW")
-
-
-project = rf.workspace("cherrytomato-n6w1z").project(
-    "cherry-tomato-classification-weatf"
+project = rf.workspace("pablo-trujillo-artunduaga").project(
+    "tomate_segmentation-qsw3p"
 )
 
 version = project.version(2)
 
 dataset = version.download("yolov8")
-
 
 print("Dataset descargado en:", dataset.location)

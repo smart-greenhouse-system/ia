@@ -1,0 +1,15 @@
+names:
+- card
+- fruit_bud
+- fruit_maturation
+- fully_grown
+nc: 4
+roboflow:
+  license: CC BY 4.0
+  project: tomate_segmentation-qsw3p
+  url: https://universe.roboflow.com/pablo-trujillo-artunduaga/tomate_segmentation-qsw3p/dataset/2
+  version: 2
+  workspace: pablo-trujillo-artunduaga
+test: ../test/images
+train: ../train/images
+val: ../valid/images
