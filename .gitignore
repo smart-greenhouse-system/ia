@@ -1,7 +1,6 @@
 __pycache__/
 *.pyc
 image/
-models/*.pt
 venv/
 venv/*
 info_project/

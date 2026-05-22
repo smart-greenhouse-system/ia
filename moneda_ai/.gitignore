@@ -1,6 +1,0 @@
-.env
-dataset/
-
-runs/
-__pycache__/
-*.pt

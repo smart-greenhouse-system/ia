@@ -1,0 +1,14 @@
+names:
+- green_cherry_tomato
+- red_cherry_tomato
+- yellow_cherry_tomato
+nc: 3
+roboflow:
+  license: CC BY 4.0
+  project: cherry-tomato-classification-weatf
+  url: https://universe.roboflow.com/cherrytomato-n6w1z/cherry-tomato-classification-weatf/dataset/2
+  version: 2
+  workspace: cherrytomato-n6w1z
+test: ../test/images
+train: ../train/images
+val: ../valid/images

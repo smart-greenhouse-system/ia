@@ -50,8 +50,16 @@
 # print("Imagen guardada.")
 
 
+# from ultralytics import YOLO
+
+# model = YOLO("models/detector_best.pt")
+
+# print(model.task)
+
 from ultralytics import YOLO
 
-model = YOLO("models/detector_best.pt")
+model_path = "/home/pablo/Documents/Python/crecimiento/tomate_ai/runs/segment/tomato_growth/weights/best.pt"
 
-print(model.task)
+model = YOLO(model_path)
+
+print(model.names)

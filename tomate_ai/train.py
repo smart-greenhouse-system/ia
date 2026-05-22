@@ -1,37 +1,299 @@
-import sys
-from pathlib import Path
+# import sys
+# from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+# sys.path.insert(0, str(Path(__file__).parent))
+
+# from ultralytics import YOLO
+# import torch
+
+# # =========================================================
+# # CONFIGURACIÓN BASE
+# # =========================================================
+
+# BASE_DIR = Path(__file__).parent
+
+# DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# # =========================================================
+# # MODELO DE SEGMENTACIÓN DE TOMATES CHERRY
+# # =========================================================
+# """
+# Entrenamiento para segmentación de tomates cherry.
+# """
+
+# seg_model = YOLO("yolov8s-seg.pt")
+
+# seg_model.train(
+
+#     data=str(
+#         BASE_DIR
+#         / "dataset"
+#         / "data.yaml"
+#     ),
+
+#     task="segment",
+
+#     # Entrenamiento
+#     epochs=100,
+#     imgsz=640,
+#     batch=8,
+
+#     # GPU / CPU
+#     device=DEVICE,
+
+#     # Guardado
+#     save=True,
+#     save_period=5,
+
+#     # Proyecto
+#     project=str(BASE_DIR / "runs" / "segment"),
+#     name="tomato_growth",
+
+#     # Mejoras entrenamiento
+#     patience=20,
+#     pretrained=True,
+#     cache=True,
+
+#     # Data augmentation
+#     hsv_h=0.015,
+#     hsv_s=0.7,
+#     hsv_v=0.4,
+
+#     degrees=10,
+#     translate=0.1,
+#     scale=0.5,
+#     fliplr=0.5,
+
+#     # Optimizaciones
+#     amp=True,
+#     workers=8,
+
+#     # Visualización
+#     plots=True,
+#     verbose=True,
+
+#     exist_ok=True
+# )
+
+# # =========================================================
+# # MODELO DE CLASIFICACIÓN / DETECCIÓN
+# # =========================================================
+# """
+# # Entrenamiento para detectar estado del tomate cherry.
+# # """
+
+# # detect_model = YOLO("yolov8n.pt")
+
+# # detect_model.train(
+
+# #     data=str(
+# #         BASE_DIR
+# #         / "cherry-tomato-classification-2"
+# #         / "data.yaml"
+# #     ),
+
+# #     task="detect",
+
+# #     # Entrenamiento
+# #     epochs=50,
+# #     imgsz=640,
+# #     batch=16,
+
+# #     # GPU / CPU
+# #     device=DEVICE,
+
+# #     # Guardado
+# #     save=True,
+# #     save_period=5,
+
+# #     # Proyecto
+# #     project=str(BASE_DIR / "runs" / "detect"),
+# #     name="tomato_state_detector",
+
+# #     # Configuración
+# #     pretrained=True,
+# #     patience=10,
+
+# #     optimizer="AdamW",
+# #     lr0=0.001,
+
+# #     amp=True,
+# #     workers=4,
+
+# #     plots=True,
+# #     verbose=True,
+
+# #     exist_ok=True
+# # )
+
+# # # =========================================================
+# # # OUTPUTS
+# # # =========================================================
+
+# # print("\nModelo de segmentación guardado en:")
+# # print(
+# #     BASE_DIR
+# #     / "runs/segment/tomato_growth/weights/best.pt"
+# # )
+
+# # print("\nModelo de detección guardado en:")
+# # print(
+# #     BASE_DIR
+# #     / "runs/detect/tomato_state_detector/weights/best.pt"
+# # )
+
+
+# from ultralytics import YOLO
+# import torch
+# from pathlib import Path
+
+# BASE_DIR = Path(__file__).parent
+
+# DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# # =========================================================
+# # MODELO SEGMENTACIÓN
+# # =========================================================
+
+# from ultralytics import YOLO
+# import torch
+
+
+# # ======================================================
+# # DEVICE
+# # ======================================================
+
+# DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# print(f"\n🚀 DEVICE: {DEVICE}")
+
+# # ======================================================
+# # MODEL
+# # ======================================================
+
+# model = YOLO("yolo11s-seg.pt")
+
+# # ======================================================
+# # TRAIN
+# # ======================================================
+
+# model.train(
+
+#     # DATASET
+#     data="/home/pablo/Documents/Python/crecimiento/tomate_ai/tomate_segmentation-1/data.yaml",
+
+#     # TASK
+#     task="segment",
+
+#     # TRAINING
+#     epochs=150,
+#     imgsz=832,
+#     batch=4,
+
+#     # DEVICE
+#     device=DEVICE,
+
+#     # PROJECT
+#     project="runs/segment",
+#     name="tomate_model_v2",
+
+#     # OPTIMIZATION
+#     patience=30,
+#     pretrained=True,
+#     amp=True,
+
+#     # BETTER GENERALIZATION
+#     close_mosaic=15,
+
+#     # AUGMENTATION
+#     hsv_h=0.015,
+#     hsv_s=0.4,
+#     hsv_v=0.2,
+
+#     degrees=5,
+#     translate=0.05,
+#     scale=0.15,
+
+#     fliplr=0.5,
+#     flipud=0.0,
+
+#     mosaic=0.0,
+#     mixup=0.0,
+
+#     # SEGMENTATION QUALITY
+#     overlap_mask=True,
+#     mask_ratio=1,
+
+#     # SAVE
+#     save=True,
+#     save_period=10
+# )
+
 
 from ultralytics import YOLO
+import torch
+from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 
-model = YOLO("yolov8s-seg.pt")
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+# =========================================================
+# MODELO SEGMENTACIÓN
+# =========================================================
+
+from ultralytics import YOLO
+import torch
+
+DEVICE = 0 if torch.cuda.is_available() else "cpu"
+
+print("🚀 DEVICE:", DEVICE)
+
+model = YOLO("yolo11n-seg.pt")
 
 model.train(
-    data=str(BASE_DIR / "dataset" / "data.yaml"),
+    data="/home/pablo/Documents/Python/crecimiento/tomate_ai/tomate_segmentation-2/data.yaml",
+
     task="segment",
-    epochs=100,
+
+    epochs=120,
+
     imgsz=640,
-    batch=8,
-    device=0,
-    save=True,
-    save_period=5,
-    project=str(BASE_DIR / "runs" / "segment"),
-    name="tomato_growth",
-    patience=20,
-    pretrained=True,
-    cache=True,
-    hsv_h=0.015,
-    hsv_s=0.7,
-    hsv_v=0.4,
-    degrees=10,
-    translate=0.1,
-    scale=0.5,
-    fliplr=0.5,
+
+    batch=2,
+
+    device=DEVICE,
+
+    workers=2,
+
+    cache=False,
+
     amp=True,
-    workers=8,
-    plots=True,
-    verbose=True
+
+    pretrained=True,
+
+    patience=25,
+
+    optimizer="AdamW",
+
+    lr0=0.001,
+
+    weight_decay=0.0005,
+
+    hsv_h=0.015,
+    hsv_s=0.4,
+    hsv_v=0.2,
+
+    degrees=5,
+    translate=0.05,
+    scale=0.10,
+
+    fliplr=0.5,
+
+    mosaic=0.0,
+    mixup=0.0,
+
+    project="runs/segment",
+
+    name="tomate_model_v2"
 )
