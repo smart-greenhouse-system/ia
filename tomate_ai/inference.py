@@ -19,14 +19,13 @@ class TomatoInference:
         print(f"\n🚀 DEVICE: {self.DEVICE}")
 
         # Rutas a modelos
-        self.SEGMENT_MODEL_PATH = Path(
-            "/home/pablo/Documents/Python/crecimiento/"
-            "tomate_ai/runs/segment/runs/segment/"
-            "tomate_model_v2-2/weights/best.pt"
+        self.SEGMENT_MODEL_PATH = (
+            self.BASE_DIR
+            / "runs" / "segment" / "runs" / "segment"
+            / "tomato_growth" / "weights" / "best.pt"
         )
-        self.GROWTH_MODEL_PATH = Path(
-            "/home/pablo/Documents/Python/crecimiento/"
-            "tomate_ai/models/best.pt"
+        self.GROWTH_MODEL_PATH = (
+            self.BASE_DIR / "models" / "best.pt"
         )
 
         self._validate_model(self.SEGMENT_MODEL_PATH)
