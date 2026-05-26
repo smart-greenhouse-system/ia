@@ -5,6 +5,7 @@
 # 4. Segmentar plantas cherry-tomato-tpgsw https://universe.roboflow.com/personal-6qa5a/cherry-tomato-tpgsw/dataset/4
 # 5. Calcular tamaño de la planta usando la segmentacion y la escala real (diámetro de una moneda) (falta implementar)
 
+# Se uso este código para descargar el dataset de segmentación de plantas de tomate cherry, pero se puede usar el mismo código para descargar los otros datasets cambiando el nombre del proyecto y la versión.
 # MODELO DE CRECIMIENTO DE TOMATE CHERRY
 # from roboflow import Roboflow
 
@@ -83,7 +84,7 @@
 
 
 
-
+# Se uso este código para descargar el dataset de segmentación de plantas de tomate cherry, pero se puede usar el mismo código para descargar los otros datasets cambiando el nombre del proyecto y la versión.
 from roboflow import Roboflow
 
 rf = Roboflow(api_key="API")
